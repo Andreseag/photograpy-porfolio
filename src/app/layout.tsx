@@ -35,7 +35,11 @@ export default function RootLayout({
   return (
     <>
       <html lang="en">
-        <body className={crimsonText.className}>{children}</body>
+        <body className={crimsonText.className}>
+          <div className="flex justify-center">
+            <div className="max-w-[1800px]">{children}</div>
+          </div>
+        </body>
       </html>
     </>
   );
