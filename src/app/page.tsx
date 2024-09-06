@@ -57,14 +57,14 @@ export default function Home() {
         {/* Images */}
         <div className="images flex gap-1">
           <Image
-            src="/img/photos/7.jpg"
+            src="/img/photos/7.JPG"
             alt="Laura Fotografía"
             width={1920}
             height={1080}
             className="w-1/2"
           />
           <Image
-            src="/img/photos/21.jpg"
+            src="/img/photos/21.JPG"
             alt="Laura Fotografía"
             width={1920}
             height={1080}
