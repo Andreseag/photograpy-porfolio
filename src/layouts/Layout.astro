@@ -1,0 +1,146 @@
+---
+// src/layouts/Layout.astro
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+}
+
+const {
+  title = 'Laura Rodríguez Fotografía | Familias, Retratos, Bebés & Bodas',
+  description = 'Fotografía profesional de familias, retratos, niños, bebés, embarazadas y bodas en Colombia. Capturando momentos únicos con sensibilidad y arte.',
+  image = '/images/og-cover.jpg',
+} = Astro.props;
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? 'https://laurarodriguezfotografia.com');
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="generator" content={Astro.generator} />
+
+    <!-- Primary SEO -->
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="keywords" content="fotografía familiar, fotografía bebés, fotografía embarazadas, bodas, retratos, sesión fotográfica Colombia" />
+    <link rel="canonical" href={canonicalURL} />
+
+    <!-- Open Graph -->
+    <meta property="og:type"        content="website" />
+    <meta property="og:url"         content={canonicalURL} />
+    <meta property="og:title"       content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image"       content={image} />
+    <meta property="og:locale"      content="es_CO" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card"        content="summary_large_image" />
+    <meta name="twitter:title"       content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image"       content={image} />
+
+    <!-- Structured Data — LocalBusiness -->
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "ProfessionalService",
+      "name": "Laura Rodríguez Fotografía",
+      "description": description,
+      "url": canonicalURL,
+      "telephone": "+573000000000",
+      "address": { "@type": "PostalAddress", "addressCountry": "CO" },
+      "serviceType": ["Fotografía familiar", "Fotografía de bodas", "Fotografía de bebés", "Fotografía de embarazadas", "Retratos", "Fotografía de niños"],
+    })} />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- Fonts preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@200;300;400&display=swap" rel="stylesheet" />
+  </head>
+
+  <body>
+    <!-- Custom cursor (desktop only) -->
+    <div class="cursor" id="cursor" aria-hidden="true"></div>
+    <div class="cursor-ring" id="cursorRing" aria-hidden="true"></div>
+
+    <slot />
+
+    <style>
+      .cursor {
+        width: 8px; height: 8px;
+        background: var(--sage-deep);
+        border-radius: 50%;
+        position: fixed; top: 0; left: 0;
+        pointer-events: none; z-index: 9999;
+        transform: translate(-50%, -50%);
+        transition: width 0.3s, height 0.3s, background 0.3s;
+      }
+      .cursor-ring {
+        width: 32px; height: 32px;
+        border: 1px solid var(--sage);
+        border-radius: 50%;
+        position: fixed; top: 0; left: 0;
+        pointer-events: none; z-index: 9998;
+        transform: translate(-50%, -50%);
+        transition: width 0.3s, height 0.3s, border-color 0.3s;
+      }
+      @media (max-width: 900px) {
+        .cursor, .cursor-ring { display: none; }
+      }
+    </style>
+
+    <script>
+      // ── Custom cursor ──
+      const cursor     = document.getElementById('cursor')!;
+      const cursorRing = document.getElementById('cursorRing')!;
+      let mouseX = 0, mouseY = 0, ringX = 0, ringY = 0;
+
+      document.addEventListener('mousemove', (e) => {
+        mouseX = e.clientX; mouseY = e.clientY;
+        cursor.style.left = mouseX + 'px';
+        cursor.style.top  = mouseY + 'px';
+      });
+
+      (function animateRing() {
+        ringX += (mouseX - ringX) * 0.12;
+        ringY += (mouseY - ringY) * 0.12;
+        cursorRing.style.left = ringX + 'px';
+        cursorRing.style.top  = ringY + 'px';
+        requestAnimationFrame(animateRing);
+      })();
+
+      document.querySelectorAll('a, button').forEach((el) => {
+        el.addEventListener('mouseenter', () => {
+          cursor.style.width  = '14px'; cursor.style.height = '14px';
+          cursorRing.style.width  = '48px'; cursorRing.style.height = '48px';
+          (cursorRing as HTMLElement).style.borderColor = 'var(--sage-deep)';
+        });
+        el.addEventListener('mouseleave', () => {
+          cursor.style.width  = '8px';  cursor.style.height = '8px';
+          cursorRing.style.width  = '32px'; cursorRing.style.height = '32px';
+          (cursorRing as HTMLElement).style.borderColor = 'var(--sage)';
+        });
+      });
+
+      // ── Scroll reveal ──
+      const reveals  = document.querySelectorAll('.reveal');
+      const observer = new IntersectionObserver(
+        (entries) => entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        }),
+        { threshold: 0.1, rootMargin: '0px 0px -40px 0px' }
+      );
+      reveals.forEach((el) => observer.observe(el));
+    </script>
+  </body>
+</html>

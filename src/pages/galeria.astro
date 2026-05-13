@@ -1,0 +1,477 @@
+---
+// src/pages/galeria.astro
+import Layout from '../layouts/Layout.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import { GALLERY_ITEMS, GALLERY_FILTERS, SERVICES } from '../data/site';
+---
+
+<Layout
+  title="Galería | Laura Rodríguez Fotografía"
+  description="Explora el portfolio completo de Laura Rodríguez Fotografía: familias, bebés, embarazadas, niños, retratos y bodas."
+>
+  <Nav />
+
+  <main>
+    <!-- Page Hero -->
+    <div class="page-hero">
+      <div class="page-hero-inner">
+        <p class="hero-tag reveal">Portfolio completo</p>
+        <h1 class="page-title reveal reveal-delay-1">
+          Cada foto,<br /><em>una historia</em>
+        </h1>
+        <p class="page-desc reveal reveal-delay-2">
+          Años capturando momentos que se convierten en recuerdos eternos.
+          Explora las sesiones por categoría.
+        </p>
+      </div>
+    </div>
+
+    <!-- Gallery Body -->
+    <section class="gallery-section">
+      <!-- Filters sidebar -->
+      <aside class="gallery-sidebar" aria-label="Categorías">
+        <p class="sidebar-label">Categorías</p>
+        <nav class="sidebar-filters" aria-label="Filtrar por categoría">
+          {GALLERY_FILTERS.map((f) => (
+            <button
+              class={`sidebar-btn${f.id === 'all' ? ' active' : ''}`}
+              data-filter={f.id}
+              aria-pressed={f.id === 'all' ? 'true' : 'false'}
+            >
+              {f.label}
+              <span class="sidebar-btn-count" data-category={f.id}>
+                {f.id === 'all' ? GALLERY_ITEMS.length : GALLERY_ITEMS.filter(i => i.category === f.id).length}
+              </span>
+            </button>
+          ))}
+        </nav>
+
+        <div class="sidebar-cta">
+          <p class="sidebar-cta-text">¿Lista para tu sesión?</p>
+          <a href="/#agendar" class="btn-primary">Agendar ahora</a>
+        </div>
+      </aside>
+
+      <!-- Grid -->
+      <div class="gallery-main">
+        <div class="gallery-count reveal">
+          <span id="visibleCount">{GALLERY_ITEMS.length}</span> fotos
+        </div>
+
+        <div class="masonry-grid" id="galleryGrid" aria-label="Galería de fotografías">
+          {GALLERY_ITEMS.map((item, i) => (
+            <button
+              class={`masonry-item reveal reveal-delay-${i % 5}`}
+              data-category={item.category}
+              data-index={i}
+              aria-label={`Ver ${item.alt}`}
+            >
+              <div class="masonry-inner">
+                {item.src
+                  ? <img src={item.src} alt={item.alt} loading="lazy" />
+                  : <span class="masonry-icon" aria-hidden="true">{item.icon}</span>
+                }
+                <div class="masonry-overlay">
+                  <span class="masonry-label">{item.label}</span>
+                  <span class="masonry-zoom" aria-hidden="true">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                      <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35M11 8v6M8 11h6"/>
+                    </svg>
+                  </span>
+                </div>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- Category showcase -->
+    <section class="categories-section" aria-label="Nuestras especialidades">
+      <div class="categories-header">
+        <p class="section-label reveal">Especialidades</p>
+        <h2 class="section-title reveal reveal-delay-1">
+          Cada sesión es<br /><em>única y especial</em>
+        </h2>
+      </div>
+      <div class="categories-grid">
+        {SERVICES.map((s, i) => (
+          <div class={`cat-card reveal reveal-delay-${i % 4}`}>
+            <span class="cat-icon" aria-hidden="true">{s.icon}</span>
+            <h3 class="cat-name">{s.name}</h3>
+            <p class="cat-desc">{s.description}</p>
+            <a href={`/#agendar`} class="cat-link">
+              Agendar {s.name}
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M3 8H13M9 4l4 4-4 4" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
+              </svg>
+            </a>
+          </div>
+        ))}
+      </div>
+    </section>
+  </main>
+
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Vista ampliada" hidden>
+    <button class="lightbox-close" id="lightboxClose" aria-label="Cerrar">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M18 6 6 18M6 6l12 12"/>
+      </svg>
+    </button>
+    <button class="lightbox-prev" id="lightboxPrev" aria-label="Anterior">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M15 18l-6-6 6-6"/>
+      </svg>
+    </button>
+    <div class="lightbox-content" id="lightboxContent">
+      <div class="lightbox-placeholder" id="lightboxPlaceholder"></div>
+    </div>
+    <button class="lightbox-next" id="lightboxNext" aria-label="Siguiente">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M9 18l6-6-6-6"/>
+      </svg>
+    </button>
+    <div class="lightbox-label" id="lightboxLabel"></div>
+  </div>
+
+  <Footer />
+</Layout>
+
+<style>
+  /* ── Page Hero ── */
+  .page-hero {
+    background: var(--sage-mist);
+    padding: 160px 80px 80px;
+    position: relative; overflow: hidden;
+  }
+  .page-hero::after {
+    content: 'Galería';
+    font-family: var(--font-display);
+    font-size: 14vw; font-style: italic; font-weight: 300;
+    color: rgba(181, 201, 176, 0.18);
+    position: absolute; right: -20px; bottom: -30px;
+    line-height: 1; pointer-events: none; white-space: nowrap;
+  }
+  .hero-tag {
+    font-size: 0.62rem; letter-spacing: 0.35em;
+    text-transform: uppercase; color: var(--sage-deep);
+    display: flex; align-items: center; gap: 14px; margin-bottom: 24px;
+  }
+  .hero-tag::before {
+    content: ''; display: block; width: 30px; height: 1px;
+    background: var(--sage-deep);
+  }
+  .page-title {
+    font-family: var(--font-display);
+    font-size: clamp(3rem, 6vw, 5.5rem);
+    font-weight: 300; line-height: 1.1; color: var(--ink);
+    margin-bottom: 20px;
+  }
+  .page-title em { font-style: italic; color: var(--sage-deep); }
+  .page-desc {
+    font-size: 0.85rem; line-height: 1.9;
+    color: var(--ink-soft); max-width: 420px;
+  }
+
+  /* ── Gallery Layout ── */
+  .gallery-section {
+    display: grid; grid-template-columns: 220px 1fr;
+    gap: 0; background: var(--cream);
+    min-height: 60vh;
+  }
+
+  /* Sidebar */
+  .gallery-sidebar {
+    padding: 60px 32px;
+    border-right: 1px solid var(--sage-light);
+    position: sticky; top: 80px; align-self: start;
+    background: var(--warm-white);
+  }
+  .sidebar-label {
+    font-size: 0.58rem; letter-spacing: 0.3em;
+    text-transform: uppercase; color: var(--stone); margin-bottom: 20px;
+  }
+  .sidebar-filters {
+    display: flex; flex-direction: column; gap: 2px;
+  }
+  .sidebar-btn {
+    display: flex; justify-content: space-between; align-items: center;
+    width: 100%; padding: 12px 16px;
+    background: none; border: none;
+    font-family: var(--font-body); font-size: 0.75rem;
+    letter-spacing: 0.08em; color: var(--ink-soft);
+    text-align: left; cursor: none;
+    transition: all 0.3s ease; border-left: 2px solid transparent;
+  }
+  .sidebar-btn:hover { color: var(--sage-deep); background: var(--sage-mist); }
+  .sidebar-btn.active {
+    color: var(--sage-ink); background: var(--sage-pale);
+    border-left-color: var(--sage-deep); font-weight: 400;
+  }
+  .sidebar-btn-count {
+    font-size: 0.65rem; color: var(--stone);
+    background: var(--sage-light); padding: 2px 8px; border-radius: 20px;
+  }
+  .sidebar-btn.active .sidebar-btn-count { background: var(--sage); color: white; }
+
+  .sidebar-cta {
+    margin-top: 48px; padding-top: 32px;
+    border-top: 1px solid var(--sage-light);
+  }
+  .sidebar-cta-text {
+    font-family: var(--font-display);
+    font-size: 1.1rem; font-style: italic;
+    color: var(--sage-deep); margin-bottom: 16px; line-height: 1.4;
+  }
+
+  /* Gallery main */
+  .gallery-main { padding: 60px 60px 80px; }
+  .gallery-count {
+    font-size: 0.62rem; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--stone); margin-bottom: 32px;
+  }
+  .gallery-count span { color: var(--sage-deep); font-weight: 400; }
+
+  .masonry-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+  }
+  .masonry-item {
+    display: block; width: 100%;
+    background: none; border: none; padding: 0;
+    cursor: none; overflow: hidden;
+  }
+  .masonry-item.hidden { display: none; }
+
+  .masonry-inner {
+    position: relative; width: 100%;
+    aspect-ratio: 2 / 3; overflow: hidden;
+    background: linear-gradient(160deg, var(--sage-pale) 0%, var(--sage-light) 60%, var(--sage-mist) 100%);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .masonry-inner img {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover; display: block;
+    transition: transform 0.6s ease;
+  }
+  .masonry-item:hover .masonry-inner img { transform: scale(1.05); }
+  .masonry-icon { font-size: 3rem; opacity: 0.25; }
+
+  .masonry-overlay {
+    position: absolute; inset: 0;
+    background: rgba(74, 107, 69, 0);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 8px;
+    transition: background 0.4s ease;
+  }
+  .masonry-item:hover .masonry-overlay { background: rgba(74, 107, 69, 0.45); }
+  .masonry-label {
+    font-family: var(--font-display);
+    font-size: 1.1rem; font-style: italic; color: white;
+    opacity: 0; transform: translateY(8px);
+    transition: all 0.4s ease;
+  }
+  .masonry-zoom {
+    color: white; opacity: 0;
+    transition: opacity 0.4s ease 0.05s;
+  }
+  .masonry-item:hover .masonry-label { opacity: 1; transform: translateY(0); }
+  .masonry-item:hover .masonry-zoom  { opacity: 1; }
+
+  /* ── Categories section ── */
+  .categories-section {
+    background: var(--warm-white);
+    padding: 100px 80px;
+  }
+  .categories-header { margin-bottom: 56px; }
+  .categories-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px;
+  }
+  .cat-card {
+    background: var(--sage-mist);
+    padding: 44px 36px;
+    transition: background 0.4s ease;
+  }
+  .cat-card:hover { background: var(--sage-pale); }
+  .cat-icon { font-size: 1.8rem; display: block; margin-bottom: 16px; }
+  .cat-name {
+    font-family: var(--font-display);
+    font-size: 1.4rem; font-weight: 400;
+    color: var(--ink); margin-bottom: 10px;
+  }
+  .cat-desc {
+    font-size: 0.78rem; line-height: 1.8;
+    color: var(--ink-soft); margin-bottom: 20px;
+  }
+  .cat-link {
+    font-size: 0.62rem; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--sage-deep); text-decoration: none;
+    display: inline-flex; align-items: center; gap: 8px;
+    transition: gap 0.3s ease;
+    cursor: none;
+  }
+  .cat-link:hover { gap: 12px; }
+
+  /* ── Lightbox ── */
+  .lightbox {
+    position: fixed; inset: 0; z-index: 500;
+    background: rgba(44, 44, 40, 0.95);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .lightbox[hidden] { display: none; }
+  .lightbox-content {
+    max-width: 80vw; max-height: 85vh;
+    position: relative;
+  }
+  .lightbox-placeholder {
+    width: 60vw; height: 75vh; max-width: 800px;
+    background: linear-gradient(135deg, var(--sage-pale), var(--sage-light));
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-display); font-size: 4rem; opacity: 0.3;
+  }
+  .lightbox-content img {
+    max-width: 80vw; max-height: 85vh;
+    object-fit: contain; display: block;
+  }
+  .lightbox-close, .lightbox-prev, .lightbox-next {
+    position: fixed; background: none; border: none;
+    color: rgba(212, 228, 207, 0.7); cursor: none;
+    transition: color 0.3s ease; padding: 16px;
+  }
+  .lightbox-close { top: 32px; right: 32px; }
+  .lightbox-prev  { left: 32px; top: 50%; transform: translateY(-50%); }
+  .lightbox-next  { right: 32px; top: 50%; transform: translateY(-50%); }
+  .lightbox-close:hover,
+  .lightbox-prev:hover,
+  .lightbox-next:hover { color: white; }
+  .lightbox-label {
+    position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%);
+    font-family: var(--font-display); font-style: italic;
+    font-size: 1.1rem; color: var(--sage-light); letter-spacing: 0.05em;
+  }
+
+  @media (max-width: 900px) {
+    .page-hero { padding: 120px 28px 60px; }
+    .gallery-section { grid-template-columns: 1fr; }
+    .gallery-sidebar {
+      position: static; padding: 28px;
+      border-right: none; border-bottom: 1px solid var(--sage-light);
+    }
+    .sidebar-filters { flex-direction: row; flex-wrap: wrap; gap: 8px; }
+    .sidebar-btn { width: auto; padding: 8px 16px; cursor: auto; }
+    .sidebar-cta { display: none; }
+    .gallery-main { padding: 32px 28px 60px; }
+    .masonry-grid { grid-template-columns: repeat(2, 1fr); gap: 3px; }
+    .categories-section { padding: 70px 28px; }
+    .categories-grid { grid-template-columns: 1fr; }
+    .cat-link { cursor: auto; }
+    .lightbox-close, .lightbox-prev, .lightbox-next { cursor: auto; }
+  }
+</style>
+
+<script>
+  // ── Gallery filter ──
+  const sidebarBtns = document.querySelectorAll<HTMLButtonElement>('.sidebar-btn');
+  const masonryItems = document.querySelectorAll<HTMLElement>('.masonry-item');
+  const countEl = document.getElementById('visibleCount')!;
+
+  function applyFilter(filter: string) {
+    let visible = 0;
+    masonryItems.forEach((item) => {
+      const match = filter === 'all' || item.dataset.category === filter;
+      item.classList.toggle('hidden', !match);
+      if (match) visible++;
+    });
+    countEl.textContent = String(visible);
+  }
+
+  sidebarBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const filter = btn.dataset.filter!;
+      sidebarBtns.forEach((b) => { b.classList.remove('active'); b.setAttribute('aria-pressed', 'false'); });
+      btn.classList.add('active');
+      btn.setAttribute('aria-pressed', 'true');
+      applyFilter(filter);
+    });
+  });
+
+  // ── Lightbox ──
+  const lightbox       = document.getElementById('lightbox') as HTMLElement;
+  const lightboxClose  = document.getElementById('lightboxClose')!;
+  const lightboxPrev   = document.getElementById('lightboxPrev')!;
+  const lightboxNext   = document.getElementById('lightboxNext')!;
+  const lightboxLabel  = document.getElementById('lightboxLabel')!;
+  const lightboxPlaceholder = document.getElementById('lightboxPlaceholder')!;
+
+  // Collect all items (not hidden) as ordered list
+  let currentIndex = 0;
+
+  function getVisibleItems() {
+    return Array.from(masonryItems).filter(i => !i.classList.contains('hidden'));
+  }
+
+  function openLightbox(index: number) {
+    const visible = getVisibleItems();
+    currentIndex = index;
+    const item = visible[currentIndex];
+    const icon   = item.querySelector('.masonry-icon')?.textContent ?? '📷';
+    const label  = item.querySelector('.masonry-label')?.textContent ?? '';
+    const img    = item.querySelector('img');
+
+    // Clear old content
+    const oldImg = lightboxPlaceholder.parentElement!.querySelector('img.lb-img');
+    if (oldImg) oldImg.remove();
+    lightboxPlaceholder.style.display = 'flex';
+    lightboxPlaceholder.textContent = icon;
+
+    if (img) {
+      const newImg = document.createElement('img');
+      newImg.src = img.src;
+      newImg.alt = img.alt;
+      newImg.className = 'lb-img';
+      newImg.style.cssText = 'max-width:80vw;max-height:85vh;object-fit:contain;display:block;';
+      newImg.onload = () => { lightboxPlaceholder.style.display = 'none'; };
+      lightboxPlaceholder.parentElement!.appendChild(newImg);
+    }
+
+    lightboxLabel.textContent = label;
+    lightbox.removeAttribute('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeLightbox() {
+    lightbox.setAttribute('hidden', '');
+    document.body.style.overflow = '';
+  }
+
+  masonryItems.forEach((item, i) => {
+    item.addEventListener('click', () => {
+      const visible = getVisibleItems();
+      const visibleIndex = visible.indexOf(item);
+      if (visibleIndex !== -1) openLightbox(visibleIndex);
+    });
+  });
+
+  lightboxClose.addEventListener('click', closeLightbox);
+  lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
+
+  lightboxPrev.addEventListener('click', () => {
+    const visible = getVisibleItems();
+    openLightbox((currentIndex - 1 + visible.length) % visible.length);
+  });
+  lightboxNext.addEventListener('click', () => {
+    const visible = getVisibleItems();
+    openLightbox((currentIndex + 1) % visible.length);
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (lightbox.hasAttribute('hidden')) return;
+    if (e.key === 'Escape')     closeLightbox();
+    if (e.key === 'ArrowLeft')  lightboxPrev.click();
+    if (e.key === 'ArrowRight') lightboxNext.click();
+  });
+</script>

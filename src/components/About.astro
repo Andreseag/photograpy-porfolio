@@ -1,0 +1,86 @@
+---
+// src/components/About.astro
+import { ABOUT } from '../data/site';
+---
+
+<section id="about" aria-labelledby="about-heading">
+  <div class="about-image" aria-hidden="true">
+    <img src="/images/prueba1.jpg" alt="Laura Rodríguez" />
+    <!-- <div class="about-photo-placeholder">Tu foto aquí</div> -->
+  </div>
+
+  <div class="about-content">
+    <p class="section-label reveal">Sobre mí</p>
+    <h2 class="section-title reveal reveal-delay-1" id="about-heading">
+      Hola, soy<br /><em>Laura Rodríguez</em>
+    </h2>
+    <blockquote class="about-quote reveal reveal-delay-2">{ABOUT.quote}</blockquote>
+    {ABOUT.bio.map((paragraph, i) => (
+      <p class={`about-text reveal reveal-delay-${i + 3}`}>{paragraph}</p>
+    ))}
+    <div class="about-signature reveal reveal-delay-4">Laura Rodríguez</div>
+    <a href="#agendar" class="btn-primary reveal reveal-delay-5">Trabajemos juntos</a>
+  </div>
+</section>
+
+<style>
+  section {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 0; padding: 0;
+    background: var(--sage-mist);
+  }
+  .about-image {
+    background: linear-gradient(160deg, var(--sage-light) 0%, var(--sage-pale) 60%, var(--sage-mist) 100%);
+    min-height: 600px;
+    display: flex; align-items: center; justify-content: center;
+    position: relative; overflow: hidden;
+  }
+  .about-image::after {
+    content: 'LR';
+    font-family: var(--font-display);
+    font-size: 12rem; color: rgba(181,201,176,0.25);
+    font-style: italic;
+    position: absolute; bottom: -20px; right: -10px;
+    line-height: 1; pointer-events: none;
+  }
+  /* Real image */
+  .about-image img {
+    width: 100%; height: 100%;
+    object-fit: cover; position: absolute; inset: 0;
+  }
+  .about-photo-placeholder {
+    width: 200px; height: 200px; border-radius: 50%;
+    background: var(--sage-pale); border: 2px solid var(--sage);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-display); font-size: 1rem;
+    color: var(--sage-deep); font-style: italic;
+    position: relative; z-index: 2;
+  }
+  .about-content {
+    padding: 100px 80px;
+    display: flex; flex-direction: column; justify-content: center;
+  }
+  .about-quote {
+    border-left: 2px solid var(--sage-light);
+    padding-left: 24px; margin: 32px 0;
+    font-family: var(--font-display);
+    font-size: 1.2rem; font-style: italic;
+    color: var(--sage-deep); line-height: 1.6;
+  }
+  .about-text {
+    font-size: 0.85rem; line-height: 2;
+    color: var(--ink-soft); margin-bottom: 16px;
+  }
+  .about-signature {
+    font-family: var(--font-display);
+    font-size: 2.2rem; font-style: italic;
+    color: var(--sage-deep); font-weight: 300; margin-top: 8px;
+  }
+  .btn-primary { align-self: flex-start; margin-top: 32px; }
+
+  @media (max-width: 900px) {
+    section { grid-template-columns: 1fr; }
+    .about-image { min-height: 280px; }
+    .about-content { padding: 60px 28px; }
+  }
+</style>

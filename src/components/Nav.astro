@@ -1,0 +1,139 @@
+---
+// src/components/Nav.astro
+---
+
+<nav id="nav" role="navigation" aria-label="Navegación principal">
+  <a href="/" class="nav-logo" aria-label="Laura Rodríguez Fotografía - Inicio">
+    Laura <span>Rodríguez</span>
+  </a>
+
+  <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+
+  <ul class="nav-links" id="navLinks" role="list">
+    <li><a href="/#home">Inicio</a></li>
+    <li><a href="/#servicios">Servicios</a></li>
+    <li><a href="/galeria">Galería</a></li>
+    <li><a href="/#about">Sobre mí</a></li>
+    <li><a href="/#agendar" class="nav-cta">Agendar sesión</a></li>
+  </ul>
+</nav>
+
+<style>
+  nav {
+    position: fixed; top: 0; width: 100%; z-index: 100;
+    padding: 28px 60px;
+    display: flex; align-items: center; justify-content: space-between;
+    background: transparent;
+    transition: background 0.4s ease, padding 0.4s ease, backdrop-filter 0.4s ease;
+  }
+  nav.scrolled {
+    background: rgba(250, 249, 246, 0.92);
+    backdrop-filter: blur(12px);
+    padding: 18px 60px;
+    border-bottom: 1px solid var(--sage-light);
+  }
+  .nav-logo {
+    font-family: var(--font-display);
+    font-size: 1.2rem; font-weight: 400;
+    letter-spacing: 0.08em;
+    color: var(--ink);
+    text-decoration: none;
+    cursor: none;
+  }
+  .nav-logo span { color: var(--sage-deep); }
+
+  .nav-links {
+    display: flex; gap: 40px; list-style: none;
+  }
+  .nav-links a {
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    text-decoration: none;
+    transition: color 0.4s ease;
+    position: relative;
+    cursor: none;
+  }
+  .nav-links a::after {
+    content: '';
+    position: absolute; bottom: -4px; left: 0;
+    width: 0; height: 1px;
+    background: var(--sage-deep);
+    transition: width 0.4s ease;
+  }
+  .nav-links a:hover { color: var(--sage-deep); }
+  .nav-links a:hover::after { width: 100%; }
+
+  .nav-cta {
+    color: var(--sage-ink) !important;
+    border: 1px solid var(--sage);
+    padding: 10px 22px;
+    transition: all 0.4s ease !important;
+  }
+  .nav-cta::after { display: none !important; }
+  .nav-cta:hover {
+    background: var(--sage-ink) !important;
+    color: white !important;
+    border-color: var(--sage-ink) !important;
+  }
+
+  .menu-toggle {
+    display: none;
+    flex-direction: column; gap: 5px;
+    background: none; border: none;
+    cursor: none; padding: 4px;
+  }
+  .menu-toggle span {
+    display: block; width: 24px; height: 1px;
+    background: var(--ink);
+    transition: all 0.4s ease;
+  }
+
+  @media (max-width: 900px) {
+    nav { padding: 24px 28px; }
+    nav.scrolled { padding: 16px 28px; }
+    .nav-links { display: none; }
+    .nav-links.open {
+      display: flex; flex-direction: column;
+      position: fixed; inset: 0;
+      background: var(--cream);
+      align-items: center; justify-content: center;
+      gap: 36px; z-index: 99;
+    }
+    .nav-links.open a { font-size: 1rem; letter-spacing: 0.1em; cursor: auto; }
+    .menu-toggle { display: flex; z-index: 200; cursor: auto; }
+  }
+</style>
+
+<script>
+  // Sticky nav
+  const nav = document.getElementById('nav')!;
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 60);
+  });
+
+  // Mobile menu
+  const toggle   = document.getElementById('menuToggle') as HTMLButtonElement;
+  const navLinks = document.getElementById('navLinks')!;
+
+  toggle.addEventListener('click', () => {
+    const open = navLinks.classList.toggle('open');
+    toggle.setAttribute('aria-expanded', String(open));
+    (toggle.children[0] as HTMLElement).style.transform = open ? 'rotate(45deg) translate(4px, 5px)' : '';
+    (toggle.children[1] as HTMLElement).style.opacity   = open ? '0' : '1';
+    (toggle.children[2] as HTMLElement).style.transform = open ? 'rotate(-45deg) translate(4px, -5px)' : '';
+  });
+
+  navLinks.querySelectorAll('a').forEach((a) => {
+    a.addEventListener('click', () => {
+      navLinks.classList.remove('open');
+      toggle.setAttribute('aria-expanded', 'false');
+      (toggle.children[0] as HTMLElement).style.transform = '';
+      (toggle.children[1] as HTMLElement).style.opacity   = '1';
+      (toggle.children[2] as HTMLElement).style.transform = '';
+    });
+  });
+</script>

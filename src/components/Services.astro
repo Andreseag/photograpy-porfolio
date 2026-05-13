@@ -1,0 +1,86 @@
+---
+// src/components/Services.astro
+import { SERVICES } from '../data/site';
+---
+
+<section id="servicios" aria-labelledby="services-heading">
+  <div class="services-header">
+    <div>
+      <p class="section-label reveal">Lo que hago</p>
+      <h2 class="section-title reveal reveal-delay-1" id="services-heading">
+        Sesiones para<br />cada <em>historia</em>
+      </h2>
+    </div>
+    <a href="#agendar" class="btn-ghost reveal">
+      Reservar sesión
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+        <path d="M3 8H13M9 4l4 4-4 4" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
+      </svg>
+    </a>
+  </div>
+
+  <div class="services-grid" role="list">
+    {SERVICES.map((s, i) => (
+      <article class={`service-card reveal reveal-delay-${i}`} role="listitem">
+        <span class="service-num" aria-hidden="true">{s.num}</span>
+        <span class="service-icon" aria-hidden="true">{s.icon}</span>
+        <h3 class="service-name">{s.name}</h3>
+        <p class="service-desc">{s.description}</p>
+      </article>
+    ))}
+  </div>
+</section>
+
+<style>
+  section {
+    background: var(--warm-white);
+    padding: 100px 80px;
+  }
+  .services-header {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    margin-bottom: 64px;
+  }
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+  }
+  .service-card {
+    background: var(--sage-mist);
+    padding: 50px 40px;
+    position: relative; overflow: hidden;
+    transition: background 0.4s ease, transform 0.4s ease;
+    cursor: none;
+  }
+  .service-card:hover {
+    background: var(--sage-pale);
+    transform: translateY(-3px);
+  }
+  .service-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0;
+    width: 3px; height: 0;
+    background: var(--sage-deep);
+    transition: height 0.4s ease;
+  }
+  .service-card:hover::before { height: 100%; }
+  .service-icon { font-size: 1.8rem; margin-bottom: 20px; display: block; }
+  .service-name {
+    font-family: var(--font-display);
+    font-size: 1.5rem; font-weight: 400;
+    color: var(--ink); margin-bottom: 12px;
+  }
+  .service-desc { font-size: 0.78rem; line-height: 1.8; color: var(--ink-soft); }
+  .service-num {
+    position: absolute; top: 24px; right: 28px;
+    font-family: var(--font-display);
+    font-size: 3rem; color: var(--sage-light);
+    font-style: italic; font-weight: 300; line-height: 1;
+  }
+
+  @media (max-width: 900px) {
+    section { padding: 70px 28px; }
+    .services-header { flex-direction: column; align-items: flex-start; gap: 24px; }
+    .services-grid { grid-template-columns: 1fr; }
+  }
+</style>

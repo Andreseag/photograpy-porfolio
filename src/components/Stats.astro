@@ -1,0 +1,38 @@
+---
+// src/components/Stats.astro
+import { SITE } from '../data/site';
+---
+
+<div class="stats-bar" role="region" aria-label="Estadísticas">
+  {SITE.stats.map((s, i) => (
+    <div class={`stat reveal reveal-delay-${i}`}>
+      <span class="stat-num">{s.num}</span>
+      <span class="stat-label">{s.label}</span>
+    </div>
+  ))}
+</div>
+
+<style>
+  .stats-bar {
+    background: var(--sage-ink);
+    padding: 28px 80px;
+    display: flex; justify-content: center; gap: 80px;
+    flex-wrap: wrap;
+  }
+  .stat { text-align: center; }
+  .stat-num {
+    font-family: var(--font-display);
+    font-size: 2rem; font-weight: 300;
+    color: var(--sage-light);
+    display: block;
+  }
+  .stat-label {
+    font-size: 0.6rem; letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(212, 228, 207, 0.6);
+    margin-top: 4px; display: block;
+  }
+  @media (max-width: 900px) {
+    .stats-bar { padding: 28px 20px; gap: 24px; }
+  }
+</style>
