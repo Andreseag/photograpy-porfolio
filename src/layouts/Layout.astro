@@ -18,7 +18,7 @@ const {
   ogType      = 'website',
 } = Astro.props;
 
-const siteURL    = Astro.site ?? new URL('https://laurarodriguezfotografia.com');
+const siteURL    = Astro.site ?? new URL('https://photograpy-porfolio.vercel.app/');
 const canonical  = new URL(Astro.url.pathname, siteURL).href;
 const ogImageAbs = new URL(ogImage, siteURL).href;
 ---
