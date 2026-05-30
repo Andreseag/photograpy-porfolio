@@ -3,18 +3,24 @@
 import '../styles/global.css';
 
 interface Props {
-  title?: string;
+  title?:       string;
   description?: string;
-  image?: string;
+  /** Ruta relativa a /public, ej: /og-galeria.png  — por defecto /og-image.png */
+  ogImage?:     string;
+  /** 'website' para páginas normales, 'article' para posts de blog */
+  ogType?:      'website' | 'article';
 }
 
 const {
-  title = 'Laura Rodríguez Fotografía | Familias, Retratos, Bebés & Bodas',
+  title       = 'Laura Rodríguez Fotografía | Familias, Retratos, Bebés & Bodas',
   description = 'Fotografía profesional de familias, retratos, niños, bebés, embarazadas y bodas en Colombia. Capturando momentos únicos con sensibilidad y arte.',
-  image = '/images/og-cover.jpg',
+  ogImage     = '/og-image.png',
+  ogType      = 'website',
 } = Astro.props;
 
-const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? 'https://laurarodriguezfotografia.com');
+const siteURL    = Astro.site ?? new URL('https://laurarodriguezfotografia.com');
+const canonical  = new URL(Astro.url.pathname, siteURL).href;
+const ogImageAbs = new URL(ogImage, siteURL).href;
 ---
 
 <!doctype html>
@@ -24,50 +30,76 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? 'https://laurarod
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="generator" content={Astro.generator} />
 
-    <!-- Primary SEO -->
+    <!-- ── Primary SEO ── -->
     <title>{title}</title>
     <meta name="description" content={description} />
-    <meta name="keywords" content="fotografía familiar, fotografía bebés, fotografía embarazadas, bodas, retratos, sesión fotográfica Colombia" />
-    <link rel="canonical" href={canonicalURL} />
+    <meta name="keywords"    content="fotografía familiar, fotografía bebés, fotografía embarazadas, bodas, retratos, sesión fotográfica Colombia" />
+    <link rel="canonical"    href={canonical} />
 
-    <!-- Open Graph -->
-    <meta property="og:type"        content="website" />
-    <meta property="og:url"         content={canonicalURL} />
+    <!-- ── Open Graph ── -->
+    <meta property="og:site_name"   content="Laura Rodríguez Fotografía" />
+    <meta property="og:type"        content={ogType} />
+    <meta property="og:url"         content={canonical} />
     <meta property="og:title"       content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:image"       content={image} />
+    <meta property="og:image"       content={ogImageAbs} />
+    <meta property="og:image:width"  content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:type"   content="image/png" />
+    <meta property="og:image:alt"    content="Laura Rodríguez Fotografía — Familias, Bebés, Bodas y más" />
     <meta property="og:locale"      content="es_CO" />
 
-    <!-- Twitter Card -->
+    <!-- ── Twitter / X Card ── -->
     <meta name="twitter:card"        content="summary_large_image" />
+    <meta name="twitter:site"        content="@laurarodriguezfoto" />
     <meta name="twitter:title"       content={title} />
     <meta name="twitter:description" content={description} />
-    <meta name="twitter:image"       content={image} />
+    <meta name="twitter:image"       content={ogImageAbs} />
+    <meta name="twitter:image:alt"   content="Laura Rodríguez Fotografía" />
 
-    <!-- Structured Data — LocalBusiness -->
+    <!-- ── WhatsApp preview (usa og:image automáticamente) ── -->
+    <!-- WhatsApp lee og:image, og:title y og:description — ya cubiertos arriba -->
+
+    <!-- ── Structured Data — LocalBusiness ── -->
     <script type="application/ld+json" set:html={JSON.stringify({
       "@context": "https://schema.org",
       "@type": "ProfessionalService",
       "name": "Laura Rodríguez Fotografía",
       "description": description,
-      "url": canonicalURL,
+      "url": canonical,
+      "image": ogImageAbs,
       "telephone": "+573000000000",
-      "address": { "@type": "PostalAddress", "addressCountry": "CO" },
-      "serviceType": ["Fotografía familiar", "Fotografía de bodas", "Fotografía de bebés", "Fotografía de embarazadas", "Retratos", "Fotografía de niños"],
+      "address": {
+        "@type": "PostalAddress",
+        "addressCountry": "CO"
+      },
+      "serviceType": [
+        "Fotografía familiar",
+        "Fotografía de bodas",
+        "Fotografía de bebés",
+        "Fotografía de embarazadas",
+        "Retratos",
+        "Fotografía de niños"
+      ],
+      "sameAs": [
+        "https://instagram.com/laurarodriguezfoto",
+        "https://facebook.com/laurarodriguezfoto"
+      ]
     })} />
 
-    <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- ── Favicon ── -->
+    <link rel="icon"             type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon"             type="image/png"     href="/favicon-32.png" sizes="32x32" />
+    <link rel="apple-touch-icon"                      href="/apple-touch-icon.png" />
 
-    <!-- Fonts preconnect -->
+    <!-- ── Fonts ── -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@200;300;400&display=swap" rel="stylesheet" />
   </head>
 
   <body>
-    <!-- Custom cursor (desktop only) -->
-    <div class="cursor" id="cursor" aria-hidden="true"></div>
+    <div class="cursor"     id="cursor"     aria-hidden="true"></div>
     <div class="cursor-ring" id="cursorRing" aria-hidden="true"></div>
 
     <slot />
@@ -75,8 +107,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? 'https://laurarod
     <style>
       .cursor {
         width: 8px; height: 8px;
-        background: var(--sage-deep);
-        border-radius: 50%;
+        background: var(--sage-deep); border-radius: 50%;
         position: fixed; top: 0; left: 0;
         pointer-events: none; z-index: 9999;
         transform: translate(-50%, -50%);
@@ -84,8 +115,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? 'https://laurarod
       }
       .cursor-ring {
         width: 32px; height: 32px;
-        border: 1px solid var(--sage);
-        border-radius: 50%;
+        border: 1px solid var(--sage); border-radius: 50%;
         position: fixed; top: 0; left: 0;
         pointer-events: none; z-index: 9998;
         transform: translate(-50%, -50%);
@@ -107,7 +137,6 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? 'https://laurarod
         cursor.style.left = mouseX + 'px';
         cursor.style.top  = mouseY + 'px';
       });
-
       (function animateRing() {
         ringX += (mouseX - ringX) * 0.12;
         ringY += (mouseY - ringY) * 0.12;
@@ -115,7 +144,6 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? 'https://laurarod
         cursorRing.style.top  = ringY + 'px';
         requestAnimationFrame(animateRing);
       })();
-
       document.querySelectorAll('a, button').forEach((el) => {
         el.addEventListener('mouseenter', () => {
           cursor.style.width  = '14px'; cursor.style.height = '14px';
@@ -130,7 +158,6 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? 'https://laurarod
       });
 
       // ── Scroll reveal ──
-      const reveals  = document.querySelectorAll('.reveal');
       const observer = new IntersectionObserver(
         (entries) => entries.forEach((entry) => {
           if (entry.isIntersecting) {
@@ -140,7 +167,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? 'https://laurarod
         }),
         { threshold: 0.1, rootMargin: '0px 0px -40px 0px' }
       );
-      reveals.forEach((el) => observer.observe(el));
+      document.querySelectorAll('.reveal').forEach((el) => observer.observe(el));
     </script>
   </body>
 </html>

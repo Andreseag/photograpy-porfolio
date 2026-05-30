@@ -10,10 +10,13 @@
     "preview": "astro preview",
     "astro": "astro"
   },
-  "keywords": [], 
+  "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "astro": "^6.1.9"
+  },
+  "devDependencies": {
+    "sharp": "^0.34.5"
   }
 }
