@@ -1,0 +1,13 @@
+.link-card-apia .hero-link-content:after {
+  background-image: url("data:image/svg+xml;utf8,<svg width='33' height='32' viewBox='0 0 33 32' fill='none' xmlns='http://www.w3.org/2000/svg'><path fill-rule='evenodd' clip-rule='evenodd' d='M30.4356 14.8638L20.8356 5.2638C20.5476 4.9758 20.1476 4.7998 19.6996 4.7998C18.8196 4.7998 18.0996 5.5198 18.0996 6.3998C18.0996 6.8478 18.2756 7.2478 18.5636 7.5358L25.4436 14.3998H3.69961C2.81961 14.3998 2.09961 15.1198 2.09961 15.9998C2.09961 16.8798 2.81961 17.5998 3.69961 17.5998H25.4436L18.5796 24.4638C18.2756 24.7518 18.0996 25.1518 18.0996 25.5998C18.0996 26.4798 18.8196 27.1998 19.6996 27.1998C20.1476 27.1998 20.5476 27.0238 20.8356 26.7358L30.4356 17.1358C30.7236 16.8478 30.8996 16.4478 30.8996 15.9998C30.8996 15.5518 30.7236 15.1518 30.4356 14.8638Z' fill='%23674BFF'/></svg>") !important;
+}
+
+.link-card-apia .hero-link-wrap:after,
+.link-card-apia .hero-link-wrap:before {
+  border-color: #e8e3ff !important;
+}
+
+.link-card-apia .hero-link-wrap:hover:after {
+  border-color: #674bff !important;
+  border-width: 2px !important;
+}

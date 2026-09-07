@@ -145,6 +145,33 @@ export const GALLERY_ITEMS: GalleryItem[] = [
     span: "wide",
     src: "/images/foto-retrato.webp",
   },
+  {
+    id: "g6",
+    category: "retratos",
+    label: "Retratos",
+    icon: "👨‍👩‍👧‍👦",
+    alt: "Retrato",
+    span: "wide",
+    src: "/images/foto-retratro-2.jpeg",
+  },
+  {
+    id: "g7",
+    category: "retratos",
+    label: "Retratos",
+    icon: "👨‍👩‍👧‍👦",
+    alt: "Retrato",
+    span: "wide",
+    src: "/images/foto-retratro-1.jpeg",
+  },
+  {
+    id: "g8",
+    category: "retratos",
+    label: "Retratos",
+    icon: "👨‍👩‍👧‍👦",
+    alt: "Retrato",
+    span: "wide",
+    src: "/images/foto-retratro-3.jpeg",
+  },
 ];
 
 export const GALLERY_FILTERS = [
