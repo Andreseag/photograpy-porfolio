@@ -1,0 +1,545 @@
+---
+// src/pages/navidad.astro
+import Layout from '../layouts/Layout.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+
+const ENDPOINT = import.meta.env.PUBLIC_SHEETS_ENDPOINT ?? '';
+
+const OPTIONS = [
+  {
+    id: 'clasica',
+    name: 'Clásica Roja & Dorada',
+    desc: 'Árbol tradicional, moños rojos, luces cálidas y regalos envueltos en dorado.',
+    emoji: ['🎄', '🎁', '🔔'],
+    colors: ['#9b2226', '#c9a227', '#2f5d3a'],
+    bg: 'linear-gradient(160deg,#fbeaea 0%,#f3d3b8 100%)',
+  },
+  {
+    id: 'bosque',
+    name: 'Bosque Nevado',
+    desc: 'Pinos, nieve artificial, ciervos y un aire de cuento de invierno.',
+    emoji: ['🌲', '❄️', '🦌'],
+    colors: ['#2f5d50', '#dfeaf0', '#8aa6b5'],
+    bg: 'linear-gradient(160deg,#e6f0f3 0%,#c9dde3 100%)',
+  },
+  {
+    id: 'minimal',
+    name: 'Blanca Minimal',
+    desc: 'Tonos crema y salvia, ramas secas, luces diminutas. Elegante y sereno.',
+    emoji: ['🕊️', '🌿', '✨'],
+    colors: ['#f4efe6', '#b5c9b0', '#d9c7a3'],
+    bg: 'linear-gradient(160deg,#faf7f0 0%,#e8efe4 100%)',
+  },
+  {
+    id: 'cabana',
+    name: 'Cabaña Acogedora',
+    desc: 'Chimenea, mantas de cuadros, chocolate caliente y madera rústica.',
+    emoji: ['🔥', '🧦', '☕'],
+    colors: ['#7a4a2b', '#b5651d', '#4a6b45'],
+    bg: 'linear-gradient(160deg,#f6e3cf 0%,#e5c19a 100%)',
+  },
+];
+---
+
+<Layout
+  title="Encuesta Navideña | Laura Rodríguez Fotografía"
+  description="Ayúdanos a elegir la decoración de las sesiones de fotos navideñas. ¡Tu voto cuenta!"
+>
+  <Nav />
+
+  <canvas id="snow" aria-hidden="true"></canvas>
+
+  <main>
+    <!-- Hero -->
+    <div class="page-hero">
+      <div class="lights" aria-hidden="true">
+        {Array.from({ length: 28 }).map((_, i) => <span class={`bulb b${i % 4}`} style={`--i:${i}`}></span>)}
+      </div>
+      <div class="page-hero-inner">
+        <p class="hero-tag reveal">Sesiones navideñas</p>
+        <h1 class="page-title reveal reveal-delay-1">
+          Tú eliges la<br /><em>magia de esta Navidad</em>
+        </h1>
+        <p class="page-desc reveal reveal-delay-2">
+          Estamos preparando la decoración de las sesiones de fotos navideñas.
+          Vota por la ambientación que más te gustaría para tu familia. ¡Solo toma un minuto!
+        </p>
+      </div>
+    </div>
+
+    <!-- Poll -->
+    <section class="poll-section">
+      <form id="pollForm" class="poll" data-endpoint={ENDPOINT} novalidate>
+        <div class="poll-head">
+          <p class="section-label">Paso 1</p>
+          <h2 class="poll-title">¿Qué decoración te enamora?</h2>
+        </div>
+
+        <fieldset class="options" aria-label="Opciones de decoración">
+          {OPTIONS.map((o, i) => (
+            <label class="option" style={`--bg:${o.bg}; --d:${i * 0.08}s`}>
+              <input type="radio" name="option" value={o.id} data-label={o.name} data-emoji={o.emoji[0]} required />
+              <span class="option-card">
+                <span class="option-check" aria-hidden="true">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m5 12 5 5L20 7"/></svg>
+                </span>
+                <span class="option-photo">
+                  <img
+                    src={`/navidad/${o.id}.jpg`}
+                    alt={`Ejemplo de decoración ${o.name}`}
+                    loading="lazy"
+                    decoding="async"
+                    onerror="this.remove()"
+                  />
+                  <span class="option-photo-tag">{o.emoji[0]} Ver estilo</span>
+                </span>
+                <span class="option-emoji" aria-hidden="true">
+                  {o.emoji.map((e, k) => <span style={`--k:${k}`}>{e}</span>)}
+                </span>
+                <span class="option-name">{o.name}</span>
+                <span class="option-desc">{o.desc}</span>
+                <span class="option-swatches" aria-hidden="true">
+                  {o.colors.map((c) => <i style={`background:${c}`}></i>)}
+                </span>
+              </span>
+            </label>
+          ))}
+        </fieldset>
+
+        <div class="poll-head poll-head-2">
+          <p class="section-label">Paso 2</p>
+          <h2 class="poll-title">Déjanos tus datos</h2>
+          <p class="poll-note">Los usamos solo para validar que votes una vez. No enviamos spam.</p>
+        </div>
+
+        <div class="fields">
+          <div class="field">
+            <label for="name">Nombre</label>
+            <input id="name" name="name" type="text" autocomplete="name" required maxlength="80" placeholder="Tu nombre" />
+          </div>
+          <div class="field">
+            <label for="email">Correo electrónico</label>
+            <input id="email" name="email" type="email" autocomplete="email" required maxlength="120" placeholder="tu@correo.com" />
+          </div>
+          <div class="field field-wide">
+            <label for="comment">¿Algún detalle que te gustaría ver? <span>(opcional)</span></label>
+            <textarea id="comment" name="comment" rows="3" maxlength="300" placeholder="Ej: un columpio de madera, luces cálidas, un trineo..."></textarea>
+          </div>
+          <!-- Honeypot anti-bots -->
+          <input type="text" name="website" tabindex="-1" autocomplete="off" class="hp" aria-hidden="true" />
+        </div>
+
+        <p class="form-error" id="formError" role="alert" hidden></p>
+
+        <button type="submit" class="vote-btn" id="voteBtn">
+          <span class="vote-btn-text">Enviar mi voto</span>
+          <span class="vote-btn-spin" aria-hidden="true"></span>
+          <span class="vote-btn-star" aria-hidden="true">🎄</span>
+        </button>
+      </form>
+
+      <!-- Estado: ya votó -->
+      <div class="already" id="already" hidden>
+        <div class="already-tree">🎄</div>
+        <h2 class="poll-title">¡Ya tenemos tu voto!</h2>
+        <p class="poll-note" id="alreadyText">Gracias por participar. Cada persona puede votar una sola vez.</p>
+        <a href="/galeria" class="btn-primary">Ver el portafolio</a>
+      </div>
+    </section>
+  </main>
+
+  <!-- Overlay de éxito -->
+  <div class="success" id="success" role="dialog" aria-modal="true" aria-labelledby="successTitle" hidden>
+    <div class="confetti" id="confetti" aria-hidden="true"></div>
+    <div class="success-card">
+      <div class="ornament" aria-hidden="true">
+        <span class="ornament-string"></span>
+        <span class="ornament-ball"><span id="successEmoji">🎄</span></span>
+      </div>
+      <p class="success-tag">¡Voto registrado!</p>
+      <h2 class="success-title" id="successTitle">Gracias, <em id="successName"></em></h2>
+      <p class="success-text">
+        Elegiste <strong id="successChoice"></strong>.<br />
+        Pronto sabrás cuál decoración ganó. ¡Será una Navidad preciosa!
+      </p>
+      <div class="success-actions">
+        <a href="/galeria" class="btn-primary">Ver portafolio</a>
+        <button type="button" class="success-close" id="successClose">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <Footer />
+</Layout>
+
+<style>
+  :root {
+    --xmas-red: #9b2226;
+    --xmas-gold: #c9a227;
+    --xmas-pine: #2f5d3a;
+  }
+
+  #snow { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 40; }
+
+  /* ── Hero ── */
+  .page-hero {
+    background: linear-gradient(180deg, #1f3d2b 0%, #2f5d3a 60%, var(--sage-deep) 100%);
+    padding: 170px 80px 90px; position: relative; overflow: hidden;
+  }
+  .page-hero::after {
+    content: 'Navidad';
+    font-family: var(--font-display); font-size: 14vw; font-style: italic; font-weight: 300;
+    color: rgba(255, 255, 255, 0.06); position: absolute; right: -20px; bottom: -30px;
+    line-height: 1; pointer-events: none; white-space: nowrap;
+  }
+  .hero-tag {
+    font-size: 0.62rem; letter-spacing: 0.35em; text-transform: uppercase; color: var(--xmas-gold);
+    display: flex; align-items: center; gap: 14px; margin-bottom: 24px;
+  }
+  .hero-tag::before { content: ''; width: 30px; height: 1px; background: var(--xmas-gold); }
+  .page-title {
+    font-family: var(--font-display); font-size: clamp(3rem, 6vw, 5.5rem);
+    font-weight: 300; line-height: 1.1; color: #fff; margin-bottom: 20px;
+  }
+  .page-title em { font-style: italic; color: #f2d98a; }
+  .page-desc { font-size: 0.85rem; line-height: 1.9; color: rgba(255, 255, 255, 0.8); max-width: 480px; }
+
+  /* Luces */
+  .lights {
+    position: absolute; top: 78px; left: 0; right: 0; height: 60px;
+    display: flex; justify-content: space-around; pointer-events: none;
+  }
+  .lights::before {
+    content: ''; position: absolute; top: 0; left: -2%; right: -2%; height: 40px;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.35); border-radius: 0 0 50% 50% / 0 0 100% 100%;
+  }
+  .bulb {
+    position: relative; width: 10px; height: 18px; border-radius: 50% 50% 55% 55%;
+    margin-top: calc(sin(var(--i) * 0.2244) * 22px + 14px);
+    animation: twinkle 2.4s ease-in-out infinite; animation-delay: calc(var(--i) * 0.13s);
+  }
+  .b0 { background: #ff5a5f; color: #ff5a5f; }
+  .b1 { background: #ffd23f; color: #ffd23f; }
+  .b2 { background: #6bd5a1; color: #6bd5a1; }
+  .b3 { background: #7ab8ff; color: #7ab8ff; }
+  .bulb { box-shadow: 0 0 14px 3px currentColor; }
+  @keyframes twinkle { 0%, 100% { opacity: 1; filter: brightness(1.2); } 50% { opacity: 0.35; filter: brightness(0.7); } }
+
+  /* ── Poll ── */
+  .poll-section {
+    background: var(--cream); padding: 90px 80px 110px;
+    background-image: radial-gradient(rgba(201, 162, 39, 0.12) 1px, transparent 1px);
+    background-size: 26px 26px;
+  }
+  .poll, .already { max-width: 1080px; margin: 0 auto; }
+  .poll-head { margin-bottom: 36px; }
+  .poll-head-2 { margin-top: 64px; }
+  .poll-title {
+    font-family: var(--font-display); font-size: clamp(1.8rem, 3vw, 2.6rem);
+    font-weight: 300; color: var(--ink); margin-top: 8px;
+  }
+  .poll-note { font-size: 0.78rem; color: var(--ink-soft); margin-top: 10px; line-height: 1.8; }
+
+  .options { border: none; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+  .option { position: relative; cursor: none; display: block; animation: rise 0.7s ease both; animation-delay: var(--d); }
+  .option input { position: absolute; opacity: 0; inset: 0; }
+  @keyframes rise { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
+
+  .option-card {
+    position: relative; display: flex; flex-direction: column; gap: 10px; height: 100%;
+    --pt: 28px; --px: 22px; --pb: 24px;
+    padding: var(--pt) var(--px) var(--pb); background: var(--bg); border: 1px solid rgba(0, 0, 0, 0.06);
+    border-radius: 4px; overflow: hidden; transition: transform 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease;
+  }
+  .option-card::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(115deg, transparent 40%, rgba(255, 255, 255, 0.55) 50%, transparent 60%);
+    transform: translateX(-120%); transition: transform 0.9s ease;
+  }
+  .option:hover .option-card { transform: translateY(-6px); box-shadow: 0 18px 40px rgba(47, 93, 58, 0.18); }
+  .option:hover .option-card::before { transform: translateX(120%); }
+  .option input:focus-visible + .option-card { outline: 2px solid var(--xmas-gold); outline-offset: 3px; }
+  .option input:checked + .option-card {
+    border-color: var(--xmas-red); box-shadow: 0 0 0 2px var(--xmas-red), 0 20px 44px rgba(155, 34, 38, 0.22);
+    transform: translateY(-6px);
+  }
+
+  /* Foto */
+  .option-photo {
+    position: relative; display: block; overflow: hidden;
+    margin: calc(var(--pt) * -1) calc(var(--px) * -1) 6px; aspect-ratio: 4 / 3;
+    background: var(--bg);
+  }
+  .option-photo img {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: cover; display: block;
+    transition: transform 0.8s ease, filter 0.4s ease;
+  }
+  .option-photo::after {
+    content: ''; position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(180deg, transparent 55%, rgba(0, 0, 0, 0.28) 100%);
+  }
+  .option:hover .option-photo img { transform: scale(1.07); }
+  .option input:checked + .option-card .option-photo img { transform: scale(1.04); filter: saturate(1.1); }
+  .option-photo-tag {
+    position: absolute; left: 14px; bottom: 12px; z-index: 1;
+    font-size: 0.58rem; letter-spacing: 0.22em; text-transform: uppercase; color: #fff;
+    opacity: 0; transform: translateY(6px); transition: all 0.4s ease;
+  }
+  .option:hover .option-photo-tag { opacity: 1; transform: none; }
+
+  .option-check {
+    z-index: 2; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    position: absolute; top: 16px; right: 16px; width: 28px; height: 28px; border-radius: 50%;
+    background: var(--xmas-red); color: #fff; display: grid; place-items: center;
+    transform: scale(0) rotate(-90deg); transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .option input:checked + .option-card .option-check { transform: scale(1) rotate(0); }
+
+  .option-emoji { display: flex; gap: 6px; font-size: 2rem; }
+  .option-emoji span { display: inline-block; transition: transform 0.4s ease; transition-delay: calc(var(--k) * 0.05s); }
+  .option:hover .option-emoji span, .option input:checked + .option-card .option-emoji span { transform: translateY(-6px) rotate(calc(var(--k) * 8deg - 8deg)); }
+  .option-name { font-family: var(--font-display); font-size: 1.45rem; color: var(--ink); line-height: 1.2; }
+  .option-desc { font-size: 0.76rem; line-height: 1.8; color: var(--ink-soft); flex: 1; }
+  .option-swatches { display: flex; gap: 6px; margin-top: 6px; }
+  .option-swatches i { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2); }
+
+  /* Campos */
+  .fields { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+  .field-wide { grid-column: 1 / -1; }
+  .field label { display: block; font-size: 0.62rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--stone); margin-bottom: 10px; }
+  .field label span { text-transform: none; letter-spacing: 0; }
+  .field input, .field textarea {
+    width: 100%; padding: 16px 18px; background: var(--warm-white); border: 1px solid var(--sage-light);
+    font-family: var(--font-body); font-size: 0.85rem; color: var(--ink); border-radius: 2px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease; resize: vertical;
+  }
+  .field input:focus, .field textarea:focus { outline: none; border-color: var(--xmas-pine); box-shadow: 0 0 0 3px rgba(47, 93, 58, 0.12); }
+  .field input.invalid { border-color: var(--xmas-red); }
+  .hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+
+  .form-error { margin-top: 20px; padding: 14px 18px; background: #fbeaea; border-left: 3px solid var(--xmas-red); color: var(--xmas-red); font-size: 0.8rem; }
+
+  .vote-btn {
+    position: relative; margin-top: 36px; display: inline-flex; align-items: center; gap: 14px;
+    padding: 20px 44px; background: var(--xmas-red); color: #fff; border: none; border-radius: 40px;
+    font-family: var(--font-body); font-size: 0.72rem; letter-spacing: 0.22em; text-transform: uppercase;
+    cursor: none; overflow: hidden; box-shadow: 0 10px 28px rgba(155, 34, 38, 0.35);
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+  }
+  .vote-btn:hover { transform: translateY(-3px); box-shadow: 0 16px 34px rgba(155, 34, 38, 0.45); background: #7f1b1f; }
+  .vote-btn:disabled { opacity: 0.8; pointer-events: none; }
+  .vote-btn-star { font-size: 1.1rem; transition: transform 0.4s ease; }
+  .vote-btn:hover .vote-btn-star { transform: rotate(20deg) scale(1.2); }
+  .vote-btn-spin { display: none; width: 16px; height: 16px; border: 2px solid rgba(255, 255, 255, 0.4); border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite; }
+  .vote-btn.loading .vote-btn-spin { display: inline-block; }
+  .vote-btn.loading .vote-btn-star { display: none; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Ya votó */
+  .already { text-align: center; padding: 60px 20px; }
+  .already[hidden] { display: none; }
+  .already .btn-primary { margin-top: 28px; display: inline-block; }
+  .already-tree { font-size: 4rem; animation: sway 3s ease-in-out infinite; transform-origin: bottom center; }
+  @keyframes sway { 0%, 100% { transform: rotate(-4deg); } 50% { transform: rotate(4deg); } }
+
+  /* ── Éxito ── */
+  .success {
+    position: fixed; inset: 0; z-index: 600; display: grid; place-items: center; padding: 24px;
+    background: radial-gradient(circle at 50% 30%, rgba(47, 93, 58, 0.96), rgba(20, 40, 28, 0.98));
+    animation: fade 0.5s ease both;
+  }
+  .success[hidden] { display: none; }
+  @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+  .success-card {
+    position: relative; z-index: 2; max-width: 520px; width: 100%; text-align: center;
+    background: var(--warm-white); padding: 90px 40px 44px; border-radius: 6px;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45); border-top: 5px solid var(--xmas-gold);
+    animation: pop 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.15s both;
+  }
+  @keyframes pop { from { opacity: 0; transform: scale(0.7) translateY(40px); } to { opacity: 1; transform: none; } }
+
+  .ornament { position: absolute; top: -4px; left: 50%; transform: translateX(-50%); transform-origin: top center; animation: swing 2.8s ease-in-out 1.2s infinite; }
+  .ornament-string { display: block; width: 2px; height: 30px; margin: 0 auto; background: var(--xmas-gold); }
+  .ornament-ball {
+    display: grid; place-items: center; width: 74px; height: 74px; border-radius: 50%; font-size: 2rem;
+    background: radial-gradient(circle at 30% 28%, #ff7b7f 0%, var(--xmas-red) 55%, #5e1013 100%);
+    box-shadow: 0 10px 24px rgba(155, 34, 38, 0.5), inset -4px -6px 10px rgba(0, 0, 0, 0.25);
+    animation: drop 1s cubic-bezier(0.34, 1.56, 0.64, 1) 0.4s both;
+  }
+  .ornament-ball::before { content: ''; position: absolute; top: 8px; left: 14px; width: 14px; height: 8px; border-radius: 50%; background: rgba(255, 255, 255, 0.55); transform: rotate(-30deg); }
+  @keyframes drop { from { transform: translateY(-120px); opacity: 0; } to { transform: none; opacity: 1; } }
+  @keyframes swing { 0%, 100% { transform: translateX(-50%) rotate(-6deg); } 50% { transform: translateX(-50%) rotate(6deg); } }
+
+  .success-tag { font-size: 0.62rem; letter-spacing: 0.35em; text-transform: uppercase; color: var(--xmas-red); margin-bottom: 14px; }
+  .success-title { font-family: var(--font-display); font-size: 2.4rem; font-weight: 300; color: var(--ink); line-height: 1.15; margin-bottom: 18px; }
+  .success-title em { font-style: italic; color: var(--xmas-pine); }
+  .success-text { font-size: 0.85rem; line-height: 1.9; color: var(--ink-soft); }
+  .success-text strong { color: var(--xmas-red); font-weight: 500; }
+  .success-actions { margin-top: 30px; display: flex; gap: 18px; justify-content: center; align-items: center; flex-wrap: wrap; }
+  .success-close { background: none; border: none; font-family: var(--font-body); font-size: 0.7rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--stone); cursor: none; }
+  .success-close:hover { color: var(--xmas-red); }
+  .success-card > * { animation: rise 0.7s ease both; }
+  .success-tag { animation-delay: 0.9s !important; } .success-title { animation-delay: 1s !important; }
+  .success-text { animation-delay: 1.1s !important; } .success-actions { animation-delay: 1.2s !important; }
+
+  .confetti { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 1; }
+  .confetti i {
+    position: absolute; top: -20px; width: 10px; height: 14px; opacity: 0.95;
+    animation: fall linear forwards;
+  }
+  @keyframes fall { to { transform: translate3d(var(--x), 110vh, 0) rotate(var(--r)); opacity: 0.9; } }
+
+  @media (max-width: 900px) {
+    .page-hero { padding: 140px 28px 70px; }
+    .lights { top: 66px; }
+    .poll-section { padding: 60px 24px 80px; }
+    .options { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .option-card { --pt: 12px; --px: 12px; --pb: 14px; gap: 6px; }
+    .option-photo { aspect-ratio: 1 / 1; margin-bottom: 4px; }
+    .option-photo-tag, .option-emoji { display: none; }
+    .option-name { font-size: 1.05rem; }
+    .option-desc { font-size: 0.68rem; line-height: 1.55; }
+    .option-swatches i { width: 16px; height: 16px; }
+    .option-check { top: 8px; right: 8px; width: 24px; height: 24px; }
+    .poll-head { margin-bottom: 24px; }
+    .poll-head-2 { margin-top: 44px; }
+    .fields { grid-template-columns: 1fr; }
+    .option, .vote-btn, .success-close { cursor: auto; }
+    .vote-btn { width: 100%; justify-content: center; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .bulb, .ornament, .already-tree, .confetti i { animation: none !important; }
+  }
+</style>
+
+<script>
+  const STORAGE_KEY = 'navidad-vote-v1';
+  const form = document.getElementById('pollForm') as HTMLFormElement;
+  const already = document.getElementById('already')!;
+  const alreadyText = document.getElementById('alreadyText')!;
+  const success = document.getElementById('success')!;
+  const errorEl = document.getElementById('formError')!;
+  const btn = document.getElementById('voteBtn') as HTMLButtonElement;
+
+  // ── Nieve ──
+  (function snow() {
+    const c = document.getElementById('snow') as HTMLCanvasElement;
+    if (!c || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const ctx = c.getContext('2d')!;
+    let w = 0, h = 0;
+    const resize = () => { w = c.width = innerWidth; h = c.height = innerHeight; };
+    resize(); addEventListener('resize', resize);
+    const flakes = Array.from({ length: 90 }, () => ({
+      x: Math.random() * innerWidth, y: Math.random() * innerHeight,
+      r: Math.random() * 2.6 + 0.8, s: Math.random() * 0.8 + 0.3, a: Math.random() * Math.PI * 2,
+    }));
+    (function tick() {
+      ctx.clearRect(0, 0, w, h);
+      ctx.fillStyle = 'rgba(255,255,255,0.85)';
+      for (const f of flakes) {
+        f.y += f.s; f.a += 0.01; f.x += Math.sin(f.a) * 0.4;
+        if (f.y > h + 5) { f.y = -5; f.x = Math.random() * w; }
+        ctx.beginPath(); ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2); ctx.fill();
+      }
+      requestAnimationFrame(tick);
+    })();
+  })();
+
+  // ── Confeti ──
+  function launchConfetti() {
+    const box = document.getElementById('confetti')!;
+    box.innerHTML = '';
+    const colors = ['#9b2226', '#c9a227', '#2f5d3a', '#f2d98a', '#ffffff', '#b5c9b0'];
+    for (let i = 0; i < 90; i++) {
+      const p = document.createElement('i');
+      p.style.left = Math.random() * 100 + '%';
+      p.style.background = colors[i % colors.length];
+      p.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+      p.style.setProperty('--x', (Math.random() * 200 - 100) + 'px');
+      p.style.setProperty('--r', (Math.random() * 900 - 450) + 'deg');
+      p.style.animationDuration = (Math.random() * 2.5 + 2.5) + 's';
+      p.style.animationDelay = (Math.random() * 1.2) + 's';
+      box.appendChild(p);
+    }
+  }
+
+  function showSuccess(name: string, choice: string, emoji: string) {
+    (document.getElementById('successName')!).textContent = name.split(' ')[0];
+    (document.getElementById('successChoice')!).textContent = choice;
+    (document.getElementById('successEmoji')!).textContent = emoji;
+    success.removeAttribute('hidden');
+    document.body.style.overflow = 'hidden';
+    launchConfetti();
+  }
+  function closeSuccess() {
+    success.setAttribute('hidden', '');
+    document.body.style.overflow = '';
+  }
+  document.getElementById('successClose')!.addEventListener('click', closeSuccess);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSuccess(); });
+
+  function markAsVoted(choice?: string) {
+    form.setAttribute('hidden', '');
+    already.removeAttribute('hidden');
+    if (choice) alreadyText.textContent = `Votaste por "${choice}". Cada persona puede votar una sola vez. ¡Gracias!`;
+  }
+
+  // ── Ya votó (cliente) ──
+  try {
+    const prev = localStorage.getItem(STORAGE_KEY);
+    if (prev) markAsVoted(JSON.parse(prev).choice);
+  } catch {}
+
+  function showError(msg: string) { errorEl.textContent = msg; errorEl.removeAttribute('hidden'); }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    errorEl.setAttribute('hidden', '');
+    const fd = new FormData(form);
+    if (fd.get('website')) return; // honeypot
+
+    const checked = form.querySelector<HTMLInputElement>('input[name="option"]:checked');
+    const name = String(fd.get('name') || '').trim();
+    const email = String(fd.get('email') || '').trim().toLowerCase();
+    const comment = String(fd.get('comment') || '').trim();
+
+    form.querySelectorAll('.invalid').forEach((el) => el.classList.remove('invalid'));
+    if (!checked) return showError('Elige una decoración para poder votar 🎄');
+    if (name.length < 2) { (form.name as unknown as HTMLElement).classList.add('invalid'); return showError('Escribe tu nombre.'); }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { (form.email as unknown as HTMLElement).classList.add('invalid'); return showError('Escribe un correo válido.'); }
+
+    const endpoint = form.dataset.endpoint;
+    if (!endpoint) return showError('La encuesta aún no está configurada (falta PUBLIC_SHEETS_ENDPOINT).');
+
+    const payload = {
+      name, email, comment,
+      optionId: checked.value,
+      optionLabel: checked.dataset.label,
+      userAgent: navigator.userAgent.slice(0, 120),
+    };
+
+    btn.disabled = true; btn.classList.add('loading');
+    try {
+      // text/plain evita el preflight CORS con Apps Script
+      const res = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) });
+      const data = await res.json();
+
+      if (data.status === 'duplicate') {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ choice: data.optionLabel || payload.optionLabel })); } catch {}
+        markAsVoted(data.optionLabel);
+        return;
+      }
+      if (data.status !== 'ok') throw new Error(data.message || 'Error');
+
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ choice: payload.optionLabel })); } catch {}
+      showSuccess(name, payload.optionLabel!, checked.dataset.emoji || '🎄');
+      markAsVoted(payload.optionLabel);
+    } catch (err) {
+      showError('No pudimos guardar tu voto. Revisa tu conexión e inténtalo de nuevo.');
+    } finally {
+      btn.disabled = false; btn.classList.remove('loading');
+    }
+  });
+</script>
