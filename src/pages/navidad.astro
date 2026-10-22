@@ -28,7 +28,7 @@ const OPTIONS = [
     name: 'Blanca Minimal',
     desc: 'Tonos crema y salvia, ramas secas, luces diminutas. Elegante y sereno.',
     emoji: ['🕊️', '🌿', '✨'],
-    colors: ['#f4efe6', '#b5c9b0', '#d9c7a3'],
+    colors: ['#f4efe6', '#b5c9b0', '#9b2226'],
     bg: 'linear-gradient(160deg,#faf7f0 0%,#e8efe4 100%)',
   },
   {
@@ -94,9 +94,9 @@ const OPTIONS = [
                   />
                   <span class="option-photo-tag">{o.emoji[0]} Ver estilo</span>
                 </span>
-                <span class="option-emoji" aria-hidden="true">
+                {/* <span class="option-emoji" aria-hidden="true">
                   {o.emoji.map((e, k) => <span style={`--k:${k}`}>{e}</span>)}
-                </span>
+                </span> */}
                 <span class="option-name">{o.name}</span>
                 <span class="option-desc">{o.desc}</span>
                 <span class="option-swatches" aria-hidden="true">
