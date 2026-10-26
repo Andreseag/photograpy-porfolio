@@ -26,7 +26,6 @@ const OPTIONS = [
   {
     id: 'minimal',
     name: 'Nevado & Rojo',
-    // sugiere otro name algo de rojo y blanco
     desc: 'Tonos crema y salvia, ramas secas, luces diminutas. Elegante y sereno.',
     emoji: ['🕊️', '🌿', '✨'],
     colors: ['#f4efe6', '#b5c9b0', '#9b2226'],
@@ -64,80 +63,158 @@ const OPTIONS = [
         </h1>
         <p class="page-desc reveal reveal-delay-2">
           Estamos preparando la decoración de las sesiones de fotos navideñas.
-          Vota por la ambientación que más te gustaría para tu familia. ¡Solo toma un minuto!
+          Vota por la ambientación que más te gustaría para tu familia. ¡Solo toman tres pasos!
         </p>
       </div>
     </div>
 
-    <!-- Poll -->
+    <!-- Poll / Wizard -->
     <section class="poll-section">
       <form id="pollForm" class="poll" data-endpoint={ENDPOINT} novalidate>
-        <div class="poll-head">
-          <p class="section-label">Paso 1</p>
-          <h2 class="poll-title">¿Qué decoración te enamora?</h2>
-        </div>
+        <!-- Progress -->
+        <ol class="wizard-progress" aria-label="Progreso de la encuesta">
+          <li class="wp-item is-active" data-wp="1">
+            <span class="wp-dot">1</span>
+            <span class="wp-label">Elige tu decoración</span>
+          </li>
+          <li class="wp-line" aria-hidden="true"></li>
+          <li class="wp-item" data-wp="2">
+            <span class="wp-dot">2</span>
+            <span class="wp-label">Tus datos</span>
+          </li>
+          <li class="wp-line" aria-hidden="true"></li>
+          <li class="wp-item" data-wp="3">
+            <span class="wp-dot">3</span>
+            <span class="wp-label">Confirma y vota</span>
+          </li>
+        </ol>
 
-        <fieldset class="options" aria-label="Opciones de decoración">
-          {OPTIONS.map((o, i) => (
-            <label class="option" style={`--bg:${o.bg}; --d:${i * 0.08}s`}>
-              <input type="radio" name="option" value={o.id} data-label={o.name} data-emoji={o.emoji[0]} required />
-              <span class="option-card">
-                <span class="option-check" aria-hidden="true">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m5 12 5 5L20 7"/></svg>
+        <!-- ══ PASO 1 · Decoración ══ -->
+        <fieldset class="wizard-step is-current" data-step="1" aria-label="Paso 1: elige tu decoración">
+          <div class="poll-head">
+            <p class="section-label">Paso 1 de 3</p>
+            <h2 class="poll-title">¿Qué decoración te enamora?</h2>
+            <p class="poll-note">Toca una tarjeta para seleccionarla y continúa cuando estés listo.</p>
+          </div>
+
+          <div class="options" role="radiogroup" aria-label="Opciones de decoración">
+            {OPTIONS.map((o, i) => (
+              <label class="option" style={`--bg:${o.bg}; --d:${i * 0.08}s`}>
+                <input type="radio" name="option" value={o.id} data-label={o.name} data-emoji={o.emoji[0]} />
+                <span class="option-card">
+                  <span class="option-check" aria-hidden="true">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m5 12 5 5L20 7"/></svg>
+                  </span>
+                  <span class="option-photo">
+                    <img
+                      src={`/navidad/${o.id}.jpg`}
+                      alt={`Ejemplo de decoración ${o.name}`}
+                      loading="lazy"
+                      decoding="async"
+                      onerror="this.remove()"
+                    />
+                    <span class="option-photo-tag">{o.emoji[0]} Ver estilo</span>
+                  </span>
+                  <span class="option-name">{o.name}</span>
+                  <span class="option-desc">{o.desc}</span>
+                  <span class="option-swatches" aria-hidden="true">
+                    {o.colors.map((c) => <i style={`background:${c}`}></i>)}
+                  </span>
                 </span>
-                <span class="option-photo">
-                  <img
-                    src={`/navidad/${o.id}.jpg`}
-                    alt={`Ejemplo de decoración ${o.name}`}
-                    loading="lazy"
-                    decoding="async"
-                    onerror="this.remove()"
-                  />
-                  <span class="option-photo-tag">{o.emoji[0]} Ver estilo</span>
-                </span>
-                {/* <span class="option-emoji" aria-hidden="true">
-                  {o.emoji.map((e, k) => <span style={`--k:${k}`}>{e}</span>)}
-                </span> */}
-                <span class="option-name">{o.name}</span>
-                <span class="option-desc">{o.desc}</span>
-                <span class="option-swatches" aria-hidden="true">
-                  {o.colors.map((c) => <i style={`background:${c}`}></i>)}
-                </span>
-              </span>
-            </label>
-          ))}
+              </label>
+            ))}
+          </div>
+
+          <div class="wizard-nav">
+            <span></span>
+            <button type="button" class="btn-step" id="nextBtn1">
+              Continuar
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
+            </button>
+          </div>
         </fieldset>
 
-        <div class="poll-head poll-head-2">
-          <p class="section-label">Paso 2</p>
-          <h2 class="poll-title">Déjanos tus datos</h2>
-          <p class="poll-note">Los usamos solo para validar que votes una vez. No enviamos spam.</p>
-        </div>
+        <!-- ══ PASO 2 · Datos ══ -->
+        <fieldset class="wizard-step" data-step="2" aria-label="Paso 2: tus datos" hidden>
+          <div class="poll-head">
+            <p class="section-label">Paso 2 de 3</p>
+            <h2 class="poll-title">Déjanos tus datos</h2>
+            <p class="poll-note">Los usamos solo para validar que votes una vez. No enviamos spam.</p>
+          </div>
 
-        <div class="fields">
-          <div class="field">
-            <label for="name">Nombre</label>
-            <input id="name" name="name" type="text" autocomplete="name" required maxlength="80" placeholder="Tu nombre" />
+          <div class="fields">
+            <div class="field">
+              <label for="name">Nombre</label>
+              <input id="name" name="name" type="text" autocomplete="name" maxlength="80" placeholder="Tu nombre" />
+            </div>
+            <div class="field">
+              <label for="whatsapp">Whatsapp</label>
+              <input id="whatsapp" name="whatsapp" type="number" autocomplete="whatsapp" maxlength="120" placeholder="+57 524152415" />
+            </div>
+            <div class="field field-wide">
+              <label for="comment">¿Algún detalle que te gustaría ver? <span>(opcional)</span></label>
+              <textarea id="comment" name="comment" rows="3" maxlength="300" placeholder="Ej: un columpio de madera, luces cálidas, un trineo..."></textarea>
+            </div>
           </div>
-          <div class="field">
-            <label for="email">Whatsapp</label>
-            <input id="email" name="email" type="email" autocomplete="email" required maxlength="120" placeholder="+57 524152415" />
+
+          <div class="wizard-nav">
+            <button type="button" class="btn-step btn-step-ghost" data-prev>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5m6 6-6-6 6-6"/></svg>
+              Atrás
+            </button>
+            <button type="button" class="btn-step" data-next>
+              Revisar mi voto
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
+            </button>
           </div>
-          <div class="field field-wide">
-            <label for="comment">¿Algún detalle que te gustaría ver? <span>(opcional)</span></label>
-            <textarea id="comment" name="comment" rows="3" maxlength="300" placeholder="Ej: un columpio de madera, luces cálidas, un trineo..."></textarea>
+        </fieldset>
+
+        <!-- ══ PASO 3 · Confirmación ══ -->
+        <fieldset class="wizard-step" data-step="3" aria-label="Paso 3: confirma tu voto" hidden>
+          <div class="poll-head">
+            <p class="section-label">Paso 3 de 3</p>
+            <h2 class="poll-title">Confirma tu voto</h2>
+            <p class="poll-note">Revisa que todo esté correcto antes de enviar.</p>
           </div>
-          <!-- Honeypot anti-bots -->
-          <input type="text" name="website" tabindex="-1" autocomplete="off" class="hp" aria-hidden="true" />
-        </div>
+
+          <div class="summary" id="summary">
+            <div class="summary-choice">
+              <div class="summary-photo" id="summaryPhoto">
+                <span class="summary-photo-empty" id="summaryPhotoEmpty">🎄</span>
+                <img id="summaryImg" alt="" hidden />
+              </div>
+              <div class="summary-info">
+                <p class="summary-emoji" id="summaryEmoji">🎄</p>
+                <p class="summary-name" id="summaryName"></p>
+                <p class="summary-desc" id="summaryDesc"></p>
+              </div>
+            </div>
+            <dl class="summary-meta">
+              <div><dt>Nombre</dt><dd id="summaryUserName"></dd></div>
+              <div><dt>Whatsapp</dt><dd id="summaryUserWhatsapp"></dd></div>
+              <div class="summary-comment-row" id="summaryCommentRow" hidden>
+                <dt>Tu comentario</dt><dd id="summaryComment"></dd>
+              </div>
+            </dl>
+          </div>
+
+          <div class="wizard-nav">
+            <button type="button" class="btn-step btn-step-ghost" data-prev>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5m6 6-6-6 6-6"/></svg>
+              Atrás
+            </button>
+            <button type="submit" class="vote-btn" id="voteBtn">
+              <span class="vote-btn-text">Enviar mi voto</span>
+              <span class="vote-btn-spin" aria-hidden="true"></span>
+              <span class="vote-btn-star" aria-hidden="true">🎄</span>
+            </button>
+          </div>
+        </fieldset>
+
+        <!-- Honeypot anti-bots -->
+        <input type="text" name="website" tabindex="-1" autocomplete="off" class="hp" aria-hidden="true" />
 
         <p class="form-error" id="formError" role="alert" hidden></p>
-
-        <button type="submit" class="vote-btn" id="voteBtn">
-          <span class="vote-btn-text">Enviar mi voto</span>
-          <span class="vote-btn-spin" aria-hidden="true"></span>
-          <span class="vote-btn-star" aria-hidden="true">🎄</span>
-        </button>
       </form>
 
       <!-- Estado: ya votó -->
@@ -235,12 +312,40 @@ const OPTIONS = [
   }
   .poll, .already { max-width: 1080px; margin: 0 auto; }
   .poll-head { margin-bottom: 36px; }
-  .poll-head-2 { margin-top: 64px; }
   .poll-title {
     font-family: var(--font-display); font-size: clamp(1.8rem, 3vw, 2.6rem);
     font-weight: 300; color: var(--ink); margin-top: 8px;
   }
   .poll-note { font-size: 0.78rem; color: var(--ink-soft); margin-top: 10px; line-height: 1.8; }
+
+  /* ── Wizard: progreso ── */
+  .wizard-progress {
+    list-style: none; display: flex; align-items: center; justify-content: center;
+    gap: 14px; margin-bottom: 56px; padding: 0;
+  }
+  .wp-item { display: flex; align-items: center; gap: 10px; opacity: 0.4; transition: opacity 0.4s ease; }
+  .wp-item.is-active, .wp-item.is-done { opacity: 1; }
+  .wp-dot {
+    width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center;
+    font-size: 0.72rem; font-weight: 600; color: var(--stone);
+    border: 1.5px solid var(--sage-light); background: var(--warm-white);
+    transition: all 0.4s ease; flex-shrink: 0;
+  }
+  .wp-item.is-active .wp-dot {
+    border-color: var(--xmas-red); background: var(--xmas-red); color: #fff;
+    box-shadow: 0 6px 16px rgba(155, 34, 38, 0.35);
+  }
+  .wp-item.is-done .wp-dot { border-color: var(--xmas-pine); background: var(--xmas-pine); color: #fff; }
+  .wp-label { font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); }
+  .wp-line { width: clamp(20px, 6vw, 70px); height: 1px; background: var(--sage-light); }
+
+  /* ── Wizard: pasos ── */
+  .wizard-step { border: none; padding: 0; margin: 0; min-width: 0; }
+  .wizard-step[hidden] { display: none; }
+  .wizard-step.anim-in { animation: stepIn 0.55s cubic-bezier(0.22, 0.8, 0.3, 1) both; }
+  .wizard-step.anim-out { animation: stepOut 0.3s ease both; }
+  @keyframes stepIn { from { opacity: 0; transform: translateX(36px); } to { opacity: 1; transform: none; } }
+  @keyframes stepOut { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateX(-36px); } }
 
   .options { border: none; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
   .option { position: relative; cursor: none; display: block; animation: rise 0.7s ease both; animation-delay: var(--d); }
@@ -298,16 +403,33 @@ const OPTIONS = [
   }
   .option input:checked + .option-card .option-check { transform: scale(1) rotate(0); }
 
-  .option-emoji { display: flex; gap: 6px; font-size: 2rem; }
-  .option-emoji span { display: inline-block; transition: transform 0.4s ease; transition-delay: calc(var(--k) * 0.05s); }
-  .option:hover .option-emoji span, .option input:checked + .option-card .option-emoji span { transform: translateY(-6px) rotate(calc(var(--k) * 8deg - 8deg)); }
   .option-name { font-family: var(--font-display); font-size: 1.45rem; color: var(--ink); line-height: 1.2; }
   .option-desc { font-size: 0.76rem; line-height: 1.8; color: var(--ink-soft); flex: 1; }
   .option-swatches { display: flex; gap: 6px; margin-top: 6px; }
   .option-swatches i { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2); }
 
+  /* ── Wizard: navegación ── */
+  .wizard-nav { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-top: 44px; }
+  .btn-step {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 16px 32px; border: none; border-radius: 40px;
+    background: var(--xmas-pine); color: #fff;
+    font-family: var(--font-body); font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase;
+    cursor: none; box-shadow: 0 8px 22px rgba(47, 93, 58, 0.3);
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+  }
+  .btn-step:hover { transform: translateY(-2px); box-shadow: 0 12px 26px rgba(47, 93, 58, 0.4); background: #264a2f; }
+  .btn-step svg { transition: transform 0.3s ease; }
+  .btn-step:hover svg { transform: translateX(3px); }
+  .btn-step-ghost {
+    background: transparent; color: var(--stone); box-shadow: none;
+    border: 1px solid var(--sage-light);
+  }
+  .btn-step-ghost:hover { background: var(--warm-white); color: var(--ink); box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08); }
+  .btn-step-ghost:hover svg { transform: translateX(-3px); }
+
   /* Campos */
-  .fields { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+  .fields { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; max-width: 760px; }
   .field-wide { grid-column: 1 / -1; }
   .field label { display: block; font-size: 0.62rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--stone); margin-bottom: 10px; }
   .field label span { text-transform: none; letter-spacing: 0; }
@@ -320,11 +442,35 @@ const OPTIONS = [
   .field input.invalid { border-color: var(--xmas-red); }
   .hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
 
+  /* ── Resumen (paso 3) ── */
+  .summary {
+    max-width: 760px; background: var(--warm-white); border: 1px solid var(--sage-light);
+    border-radius: 6px; overflow: hidden;
+    box-shadow: 0 14px 40px rgba(47, 93, 58, 0.08);
+  }
+  .summary-choice { display: flex; gap: 0; }
+  .summary-photo {
+    position: relative; width: 220px; min-height: 180px; flex-shrink: 0;
+    background: linear-gradient(160deg, #fbeaea, #f3d3b8);
+    display: grid; place-items: center; overflow: hidden;
+  }
+  .summary-photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .summary-photo-empty { font-size: 3rem; }
+  .summary-info { padding: 28px; flex: 1; }
+  .summary-emoji { font-size: 1.6rem; margin-bottom: 8px; }
+  .summary-name { font-family: var(--font-display); font-size: 1.8rem; font-weight: 300; color: var(--ink); line-height: 1.2; }
+  .summary-desc { font-size: 0.8rem; line-height: 1.8; color: var(--ink-soft); margin-top: 8px; }
+  .summary-meta { border-top: 1px solid var(--sage-light); padding: 22px 28px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 0; }
+  .summary-meta dt { font-size: 0.58rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--stone); margin-bottom: 6px; }
+  .summary-meta dd { margin: 0; font-size: 0.88rem; color: var(--ink); }
+  .summary-comment-row { grid-column: 1 / -1; }
+  .summary-comment-row dd { font-size: 0.8rem; color: var(--ink-soft); line-height: 1.7; }
+
   .form-error { margin-top: 20px; padding: 14px 18px; background: #fbeaea; border-left: 3px solid var(--xmas-red); color: var(--xmas-red); font-size: 0.8rem; }
 
   .vote-btn {
-    position: relative; margin-top: 36px; display: inline-flex; align-items: center; gap: 14px;
-    padding: 20px 44px; background: var(--xmas-red); color: #fff; border: none; border-radius: 40px;
+    position: relative; display: inline-flex; align-items: center; gap: 14px;
+    padding: 16px 38px; background: var(--xmas-red); color: #fff; border: none; border-radius: 40px;
     font-family: var(--font-body); font-size: 0.72rem; letter-spacing: 0.22em; text-transform: uppercase;
     cursor: none; overflow: hidden; box-shadow: 0 10px 28px rgba(155, 34, 38, 0.35);
     transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
@@ -395,23 +541,28 @@ const OPTIONS = [
   @media (max-width: 900px) {
     .page-hero { padding: 140px 28px 70px; }
     .lights { top: 66px; }
-    .poll-section { padding: 60px 24px 80px; }
+    .poll-section { padding: 50px 24px 80px; }
+    .wizard-progress { gap: 8px; margin-bottom: 40px; }
+    .wp-label { display: none; }
     .options { grid-template-columns: repeat(2, 1fr); gap: 10px; }
     .option-card { --pt: 12px; --px: 12px; --pb: 14px; gap: 6px; }
     .option-photo { aspect-ratio: 1 / 1; margin-bottom: 4px; }
-    .option-photo-tag, .option-emoji { display: none; }
+    .option-photo-tag { display: none; }
     .option-name { font-size: 1.05rem; }
     .option-desc { font-size: 0.68rem; line-height: 1.55; }
     .option-swatches i { width: 16px; height: 16px; }
     .option-check { top: 8px; right: 8px; width: 24px; height: 24px; }
     .poll-head { margin-bottom: 24px; }
-    .poll-head-2 { margin-top: 44px; }
-    .fields { grid-template-columns: 1fr; }
-    .option, .vote-btn, .success-close { cursor: auto; }
-    .vote-btn { width: 100%; justify-content: center; }
+    .fields { grid-template-columns: 1fr; max-width: none; }
+    .summary-choice { flex-direction: column; }
+    .summary-photo { width: 100%; min-height: 160px; }
+    .summary-meta { grid-template-columns: 1fr; }
+    .wizard-nav { flex-direction: column-reverse; align-items: stretch; }
+    .btn-step, .vote-btn { justify-content: center; width: 100%; }
+    .option, .vote-btn, .btn-step, .success-close { cursor: auto; }
   }
   @media (prefers-reduced-motion: reduce) {
-    .bulb, .ornament, .already-tree, .confetti i { animation: none !important; }
+    .bulb, .ornament, .already-tree, .confetti i, .wizard-step.anim-in, .wizard-step.anim-out { animation: none !important; }
   }
 </style>
 
@@ -423,6 +574,109 @@ const OPTIONS = [
   const success = document.getElementById('success')!;
   const errorEl = document.getElementById('formError')!;
   const btn = document.getElementById('voteBtn') as HTMLButtonElement;
+
+  // ── Wizard ──
+  const steps = Array.from(form.querySelectorAll<HTMLElement>('.wizard-step'));
+  const progressItems = Array.from(document.querySelectorAll<HTMLElement>('.wp-item'));
+  let currentStep = 1;
+
+  function renderProgress() {
+    progressItems.forEach((item) => {
+      const n = Number(item.dataset.wp);
+      item.classList.toggle('is-active', n === currentStep);
+      item.classList.toggle('is-done', n < currentStep);
+    });
+  }
+
+  function goToStep(n: number) {
+    if (n === currentStep) return;
+    const prev = steps.find((s) => Number(s.dataset.step) === currentStep);
+    const next = steps.find((s) => Number(s.dataset.step) === n);
+    if (!prev || !next) return;
+
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    currentStep = n;
+    renderProgress();
+    hideError();
+
+    const show = () => {
+      prev.hidden = true;
+      prev.classList.remove('anim-in', 'anim-out');
+      next.hidden = false;
+      next.classList.remove('anim-in', 'anim-out');
+      if (!reduced) next.classList.add('anim-in');
+      const focusable = next.querySelector<HTMLElement>('input:not([type="radio"]), textarea, button');
+      focusable?.focus({ preventScroll: true });
+      next.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
+    };
+
+    if (reduced) { show(); return; }
+    prev.classList.add('anim-out');
+    setTimeout(show, 280);
+  }
+
+  function getChecked() {
+    return form.querySelector<HTMLInputElement>('input[name="option"]:checked');
+  }
+
+  // Validaciones por paso
+  function validateStep1(): boolean {
+    if (!getChecked()) { showError('Elige una decoración para poder continuar 🎄'); return false; }
+    return true;
+  }
+  function validateStep2(): boolean {
+    const name = (form.name as unknown as HTMLInputElement).value.trim();
+    const whatsapp = (form.whatsapp as unknown as HTMLInputElement).value.trim().toLowerCase();
+    form.querySelectorAll('.invalid').forEach((el) => el.classList.remove('invalid'));
+    if (name.length < 2) {
+      (form.name as unknown as HTMLElement).classList.add('invalid');
+      showError('Escribe tu nombre.');
+      (form.name as unknown as HTMLElement).focus();
+      return false;
+    }
+
+    if (!whatsapp) {
+      (form.whatsapp as unknown as HTMLElement).classList.add('invalid');
+    //   showError('Escribe un correo válido.');
+    //   (form.whatsapp as unknown as HTMLElement).focus();
+    //   return false;
+    }
+    
+    return true;
+  }
+
+  function fillSummary() {
+    const checked = getChecked();
+    if (checked) {
+      const card = checked.closest('.option')!;
+      const desc = card.querySelector('.option-desc')?.textContent ?? '';
+      const img = card.querySelector<HTMLImageElement>('.option-photo img');
+      const sImg = document.getElementById('summaryImg') as HTMLImageElement;
+      if (img) { sImg.src = img.src; sImg.alt = img.alt; sImg.hidden = false; document.getElementById('summaryPhotoEmpty')!.hidden = true; }
+      (document.getElementById('summaryEmoji')!).textContent = checked.dataset.emoji || '🎄';
+      (document.getElementById('summaryName')!).textContent = checked.dataset.label || '';
+      (document.getElementById('summaryDesc')!).textContent = desc;
+    }
+    (document.getElementById('summaryUserName')!).textContent = (form.name as unknown as HTMLInputElement).value.trim();
+    (document.getElementById('summaryUserWhatsapp')!).textContent = (form.whatsapp as unknown as HTMLInputElement).value.trim();
+    const comment = (form.comment as unknown as HTMLTextAreaElement).value.trim();
+    const row = document.getElementById('summaryCommentRow')!;
+    if (comment) { (document.getElementById('summaryComment')!).textContent = comment; row.hidden = false; }
+    else row.hidden = true;
+  }
+
+  document.getElementById('nextBtn1')!.addEventListener('click', () => { if (validateStep1()) goToStep(2); });
+  form.querySelectorAll<HTMLElement>('[data-next]').forEach((b) =>
+    b.addEventListener('click', () => { if (validateStep2()) { fillSummary(); goToStep(3); } })
+  );
+  form.querySelectorAll<HTMLElement>('[data-prev]').forEach((b) =>
+    b.addEventListener('click', () => goToStep(currentStep - 1))
+  );
+
+  // Seleccionar una opción en el paso 1: feedback visual inmediato (sin avanzar automático)
+  form.querySelectorAll<HTMLInputElement>('input[name="option"]').forEach((radio) =>
+    radio.addEventListener('change', hideError)
+  );
 
   // ── Nieve ──
   (function snow() {
@@ -494,28 +748,29 @@ const OPTIONS = [
   } catch {}
 
   function showError(msg: string) { errorEl.textContent = msg; errorEl.removeAttribute('hidden'); }
+  function hideError() { errorEl.setAttribute('hidden', ''); }
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    errorEl.setAttribute('hidden', '');
+    hideError();
     const fd = new FormData(form);
     if (fd.get('website')) return; // honeypot
 
-    const checked = form.querySelector<HTMLInputElement>('input[name="option"]:checked');
+    const checked = getChecked();
     const name = String(fd.get('name') || '').trim();
-    const email = String(fd.get('email') || '').trim().toLowerCase();
+    const whatsapp = String(fd.get('whatsapp') || '').trim().toLowerCase();
     const comment = String(fd.get('comment') || '').trim();
 
-    form.querySelectorAll('.invalid').forEach((el) => el.classList.remove('invalid'));
-    if (!checked) return showError('Elige una decoración para poder votar 🎄');
-    if (name.length < 2) { (form.name as unknown as HTMLElement).classList.add('invalid'); return showError('Escribe tu nombre.'); }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { (form.email as unknown as HTMLElement).classList.add('invalid'); return showError('Escribe un correo válido.'); }
+    if (!checked || name.length < 2 ) {
+      goToStep(!checked ? 1 : 2);
+      return showError('Revisa los datos antes de enviar tu voto.');
+    }
 
     const endpoint = form.dataset.endpoint;
     if (!endpoint) return showError('La encuesta aún no está configurada (falta PUBLIC_SHEETS_ENDPOINT).');
 
     const payload = {
-      name, email, comment,
+      name, whatsapp, comment,
       optionId: checked.value,
       optionLabel: checked.dataset.label,
       userAgent: navigator.userAgent.slice(0, 120),
