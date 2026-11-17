@@ -1,0 +1,14 @@
+---
+export const prerender = false;
+import AdminPanel from '../../layouts/AdminPanel.astro';
+---
+<AdminPanel title="Inicio" active="inicio">
+  <div class="page-head">
+    <div>
+      <p class="eyebrow">Bienvenida</p>
+      <h1>Panel de gestión</h1>
+    </div>
+    <a class="btn" href="/admin/clientes/nuevo">Nuevo cliente</a>
+  </div>
+  <p>Sesión iniciada como {(Astro.locals as typeof Astro.locals & { user: { email: string } }).user.email}.</p>
+</AdminPanel>

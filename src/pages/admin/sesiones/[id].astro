@@ -1,0 +1,71 @@
+---
+export const prerender = false;
+import AdminPanel from '../../../layouts/AdminPanel.astro';
+import SessionForm from '../../../components/SessionForm.astro';
+import { parseSessionForm, toLocalInput, type SessionFormValues } from '../../../lib/sessions';
+
+const id = String(Astro.params.id);
+const supabase = (Astro.locals as typeof Astro.locals & {
+  supabase: import('@supabase/supabase-js').SupabaseClient;
+}).supabase;
+
+const { data: session } = await supabase
+  .from('sessions')
+  .select('client_id, type, starts_at, ends_at, location, price, status, notes')
+  .eq('id', id)
+  .maybeSingle();
+
+if (!session) return Astro.redirect('/admin/sesiones');
+
+const { data: clients } = await supabase.from('clients').select('id, name').order('name');
+
+let error = '';
+let values: SessionFormValues = {
+  client_id: session.client_id,
+  type: session.type,
+  starts_at: toLocalInput(session.starts_at),
+  ends_at: toLocalInput(session.ends_at),
+  location: session.location ?? '',
+  price: session.price != null ? String(session.price) : '',
+  status: session.status,
+  notes: session.notes ?? '',
+};
+
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+
+  if (form.get('_action') === 'delete') {
+    const { error: e } = await supabase.from('sessions').delete().eq('id', id);
+    if (e) error = 'No se pudo eliminar. Intenta de nuevo.';
+    else return Astro.redirect('/admin/sesiones?vista=todas&ok=eliminada');
+  } else {
+    const parsed = parseSessionForm(form);
+    values = parsed.values;
+
+    if (parsed.error || !parsed.payload) {
+      error = parsed.error ?? 'Datos no válidos';
+    } else {
+      const { error: e } = await supabase.from('sessions').update(parsed.payload).eq('id', id);
+      if (e) error = 'No se pudo guardar. Intenta de nuevo.';
+      else return Astro.redirect('/admin/sesiones?vista=todas&ok=actualizada');
+    }
+  }
+}
+---
+<AdminPanel title="Editar sesión" active="sesiones">
+  <div class="page-head">
+    <div>
+      <p class="eyebrow">Editar sesión</p>
+      <h1>{values.type}</h1>
+    </div>
+  </div>
+
+  <SessionForm values={values} clients={clients ?? []} error={error} submitLabel="Guardar cambios" />
+
+  <div class="danger-zone">
+    <form method="POST" onsubmit="return confirm('¿Eliminar esta sesión? Esta acción no se puede deshacer.')">
+      <input type="hidden" name="_action" value="delete" />
+      <button class="btn danger" type="submit">Eliminar sesión</button>
+    </form>
+  </div>
+</AdminPanel>

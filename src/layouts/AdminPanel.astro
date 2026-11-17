@@ -1,0 +1,30 @@
+---
+import '../styles/admin.css';
+import AdminLayout from './AdminLayout.astro';
+
+interface Props { title: string; active?: 'inicio' | 'clientes' | 'sesiones' }
+const { title, active } = Astro.props;
+
+const links = [
+  { href: '/admin', label: 'Inicio', key: 'inicio' },
+  { href: '/admin/clientes', label: 'Clientes', key: 'clientes' },
+  { href: '/admin/sesiones', label: 'Sesiones', key: 'sesiones' },
+];
+---
+<AdminLayout title={title}>
+  <div class="panel">
+    <aside class="side">
+      <a class="brand" href="/admin">Laura Rodríguez <em>Fotografía</em></a>
+      <nav>
+        {links.map((l) => (
+          <a href={l.href} class:list={[{ active: active === l.key }]}>{l.label}</a>
+        ))}
+        <span class="soon">Sesiones <small>pronto</small></span>
+      </nav>
+      <form method="POST" action="/admin/logout">
+        <button class="linkbtn" type="submit">Cerrar sesión</button>
+      </form>
+    </aside>
+    <main class="main"><slot /></main>
+  </div>
+</AdminLayout>

@@ -1,0 +1,95 @@
+---
+export const prerender = false;
+import AdminPanel from '../../../layouts/AdminPanel.astro';
+import { STATUSES, formatDate, formatCOP, statusLabel } from '../../../lib/sessions';
+import type { SupabaseClient } from '@supabase/supabase-js';
+
+const supabase = (Astro.locals as { supabase: SupabaseClient }).supabase;
+const params = Astro.url.searchParams;
+
+const rawVista = params.get('vista') ?? '';
+const vista = ['proximas', 'pasadas', 'todas'].includes(rawVista) ? rawVista : 'proximas';
+const rawEstado = params.get('estado') ?? '';
+const estado = STATUSES.some((s) => s.value === rawEstado) ? rawEstado : '';
+const ok = params.get('ok');
+
+const now = new Date().toISOString();
+let query = supabase
+  .from('sessions')
+  .select('id, type, starts_at, location, price, status, clients(name)');
+
+if (vista === 'proximas') query = query.gte('starts_at', now).order('starts_at', { ascending: true });
+else if (vista === 'pasadas') query = query.lt('starts_at', now).order('starts_at', { ascending: false });
+else query = query.order('starts_at', { ascending: false });
+
+if (estado) query = query.eq('status', estado);
+
+const { data: sessions, error } = await query;
+
+const clientName = (c: any) => (Array.isArray(c) ? c[0]?.name : c?.name) ?? '—';
+const messages: Record<string, string> = {
+  creada: 'Sesión creada',
+  actualizada: 'Cambios guardados',
+  eliminada: 'Sesión eliminada',
+};
+---
+<AdminPanel title="Sesiones" active="sesiones">
+  <div class="page-head">
+    <div>
+      <p class="eyebrow">Agenda</p>
+      <h1>Sesiones</h1>
+    </div>
+    <a class="btn" href="/admin/sesiones/nueva">Nueva sesión</a>
+  </div>
+
+  {ok && messages[ok] && <p class="alert ok">{messages[ok]}</p>}
+  {error && <p class="alert err">No se pudieron cargar las sesiones.</p>}
+
+  <form class="filters" method="GET">
+    <label>
+      <span>Mostrar</span>
+      <select name="vista">
+        <option value="proximas" selected={vista === 'proximas'}>Próximas</option>
+        <option value="pasadas" selected={vista === 'pasadas'}>Pasadas</option>
+        <option value="todas" selected={vista === 'todas'}>Todas</option>
+      </select>
+    </label>
+    <label>
+      <span>Estado</span>
+      <select name="estado">
+        <option value="">Todos</option>
+        {STATUSES.map((s) => (
+          <option value={s.value} selected={s.value === estado}>{s.label}</option>
+        ))}
+      </select>
+    </label>
+    <button class="btn ghost" type="submit">Filtrar</button>
+  </form>
+
+  <div class="table-wrap">
+    {sessions && sessions.length > 0 ? (
+      <table>
+        <thead>
+          <tr>
+            <th>Fecha</th><th>Cliente</th><th>Tipo</th>
+            <th>Lugar</th><th>Precio</th><th>Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          {sessions.map((s) => (
+            <tr>
+              <td><a href={`/admin/sesiones/${s.id}`}>{formatDate(s.starts_at)}</a></td>
+              <td>{clientName(s.clients)}</td>
+              <td>{s.type}</td>
+              <td>{s.location ?? '—'}</td>
+              <td>{formatCOP(s.price)}</td>
+              <td><span class={`badge ${s.status}`}>{statusLabel(s.status)}</span></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    ) : (
+      <p class="empty">No hay sesiones con esos filtros.</p>
+    )}
+  </div>
+</AdminPanel>

@@ -1,0 +1,42 @@
+---
+export const prerender = false;
+import AdminPanel from '../../../layouts/AdminPanel.astro';
+import ClientForm from '../../../components/ClientForm.astro';
+import { parseClientForm, type ClientInput } from '../../../lib/clients';
+
+const id = String(Astro.params.id);
+const supabase = (Astro.locals as typeof Astro.locals & { supabase: any }).supabase;
+
+const { data: client } = await supabase
+  .from('clients')
+  .select('name, phone, email, notes')
+  .eq('id', id)
+  .maybeSingle();
+
+if (!client) return Astro.redirect('/admin/clientes');
+
+let error = '';
+let values: ClientInput = client;
+
+if (Astro.request.method === 'POST') {
+  const parsed = parseClientForm(await Astro.request.formData());
+  values = parsed.values;
+
+  if (parsed.error) {
+    error = parsed.error;
+  } else {
+    const { error: e } = await supabase.from('clients').update(values).eq('id', id);
+    if (e) error = 'No se pudo guardar. Intenta de nuevo.';
+    else return Astro.redirect('/admin/clientes?ok=actualizado');
+  }
+}
+---
+<AdminPanel title={client.name} active="clientes">
+  <div class="page-head">
+    <div>
+      <p class="eyebrow">Editar cliente</p>
+      <h1>{client.name}</h1>
+    </div>
+  </div>
+  <ClientForm values={values} error={error} submitLabel="Guardar cambios" />
+</AdminPanel>

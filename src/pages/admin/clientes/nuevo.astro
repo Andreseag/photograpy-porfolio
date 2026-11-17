@@ -1,0 +1,31 @@
+---
+export const prerender = false;
+import AdminPanel from '../../../layouts/AdminPanel.astro';
+import ClientForm from '../../../components/ClientForm.astro';
+import { parseClientForm, type ClientInput } from '../../../lib/clients';
+
+let error = '';
+let values: ClientInput = { name: '', phone: null, email: null, notes: null };
+
+if (Astro.request.method === 'POST') {
+  const parsed = parseClientForm(await Astro.request.formData());
+  values = parsed.values;
+
+  if (parsed.error) {
+    error = parsed.error;
+  } else {
+    const { error: e } = await (Astro.locals as any).supabase.from('clients').insert(values);
+    if (e) error = 'No se pudo guardar. Intenta de nuevo.';
+    else return Astro.redirect('/admin/clientes?ok=creado');
+  }
+}
+---
+<AdminPanel title="Nuevo cliente" active="clientes">
+  <div class="page-head">
+    <div>
+      <p class="eyebrow">Clientes</p>
+      <h1>Nuevo cliente</h1>
+    </div>
+  </div>
+  <ClientForm values={values} error={error} submitLabel="Crear cliente" />
+</AdminPanel>

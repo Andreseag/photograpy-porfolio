@@ -1,0 +1,187 @@
+---
+export const prerender = false;
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { createClient } from '../../lib/supabase';
+
+let error = '';
+let email = '';
+
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  email = String(form.get('email') ?? '');
+  const supabase = createClient(Astro);
+  console.log("!DEBUGGER")
+  const { error: e } = await supabase.auth.signInWithPassword({
+    email,
+    password: String(form.get('password') ?? ''),
+  });
+  console.log("Error:", e)
+  if (e) error = 'Correo o contraseña incorrectos';
+  else return Astro.redirect('/admin');
+}
+---
+<AdminLayout title="Ingresar">
+  <main class="login">
+    <section class="card">
+      <p class="eyebrow">Panel privado</p>
+      <h1>Laura Rodríguez <em>Fotografía</em></h1>
+      <span class="rule" aria-hidden="true"></span>
+
+      <form method="POST" novalidate>
+        <label>
+          <span>Correo</span>
+          <input
+            name="email"
+            type="email"
+            value={email}
+            autocomplete="username"
+            required
+            autofocus
+          />
+        </label>
+
+        <label>
+          <span>Contraseña</span>
+          <input
+            name="password"
+            type="password"
+            autocomplete="current-password"
+            required
+          />
+        </label>
+
+        {error && <p class="error" role="alert">{error}</p>}
+
+        <button type="submit">Entrar</button>
+      </form>
+
+      <a class="back" href="/">← Volver al sitio</a>
+    </section>
+  </main>
+</AdminLayout>
+
+<style>
+  .login {
+    --bg: var(--cream, #f6f2ec);
+    --ink: var(--charcoal, #2b2e29);
+    --muted: #8b8f86;
+    --accent: var(--sage, #9aab8e);
+    --accent-deep: var(--sage-deep, #667a5c);
+
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: 1.5rem;
+    background:
+      radial-gradient(ellipse at top, rgba(154, 171, 142, 0.18), transparent 60%),
+      var(--bg);
+    color: var(--ink);
+  }
+
+  .card {
+    width: 100%;
+    max-width: 400px;
+    padding: 3rem 2.5rem 2.25rem;
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(154, 171, 142, 0.35);
+    box-shadow: 0 20px 60px -30px rgba(43, 46, 41, 0.25);
+    text-align: center;
+  }
+
+  .eyebrow {
+    margin: 0 0 1rem;
+    font-size: 0.7rem;
+    font-weight: 400;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--accent-deep);
+  }
+
+  h1 {
+    margin: 0;
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 300;
+    font-size: 2rem;
+    line-height: 1.15;
+  }
+  h1 em { font-style: italic; color: var(--accent-deep); }
+
+  .rule {
+    display: block;
+    width: 40px;
+    height: 1px;
+    margin: 1.5rem auto 2rem;
+    background: var(--accent);
+  }
+
+  form { display: grid; gap: 1.5rem; text-align: left; }
+
+  label span {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-size: 0.68rem;
+    font-weight: 400;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.6rem 0;
+    font: inherit;
+    font-size: 1rem;
+    color: var(--ink);
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid rgba(43, 46, 41, 0.25);
+    border-radius: 0;
+    outline: none;
+    transition: border-color 0.25s;
+  }
+  input:focus { border-bottom-color: var(--accent-deep); }
+
+  .error {
+    margin: 0;
+    padding: 0.6rem 0.8rem;
+    font-size: 0.85rem;
+    color: #8a3b3b;
+    background: rgba(138, 59, 59, 0.08);
+    border-left: 2px solid #8a3b3b;
+  }
+
+  button {
+    margin-top: 0.5rem;
+    padding: 0.95rem 1rem;
+    font: inherit;
+    font-size: 0.75rem;
+    font-weight: 400;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: #fff;
+    background: var(--accent-deep);
+    border: 0;
+    cursor: pointer;
+    transition: background 0.25s, transform 0.15s;
+  }
+  button:hover { background: var(--ink); }
+  button:active { transform: translateY(1px); }
+  button:focus-visible,
+  .back:focus-visible { outline: 2px solid var(--accent-deep); outline-offset: 3px; }
+
+  .back {
+    display: inline-block;
+    margin-top: 2rem;
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.25s;
+  }
+  .back:hover { color: var(--accent-deep); }
+
+  @media (max-width: 480px) {
+    .card { padding: 2.25rem 1.5rem 1.75rem; }
+  }
+</style>

@@ -1,0 +1,34 @@
+---
+import type { ClientInput } from '../lib/clients';
+
+interface Props { values: ClientInput; error?: string; submitLabel: string }
+const { values, error, submitLabel } = Astro.props;
+---
+<form method="POST" class="form" novalidate>
+  {error && <p class="alert err" role="alert">{error}</p>}
+
+  <label>
+    <span>Nombre *</span>
+    <input name="name" value={values.name} required autofocus />
+  </label>
+
+  <label>
+    <span>Teléfono / WhatsApp</span>
+    <input name="phone" type="tel" value={values.phone ?? ''} />
+  </label>
+
+  <label>
+    <span>Correo</span>
+    <input name="email" type="email" value={values.email ?? ''} />
+  </label>
+
+  <label>
+    <span>Notas</span>
+    <textarea name="notes">{values.notes ?? ''}</textarea>
+  </label>
+
+  <div class="actions">
+    <button class="btn" type="submit">{submitLabel}</button>
+    <a class="btn ghost" href="/admin/clientes">Cancelar</a>
+  </div>
+</form>

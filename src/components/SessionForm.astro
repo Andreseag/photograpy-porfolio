@@ -1,0 +1,79 @@
+---
+import { STATUSES, SESSION_TYPES, type SessionFormValues } from '../lib/sessions';
+
+interface Props {
+  values: SessionFormValues;
+  clients: { id: string; name: string }[];
+  error?: string;
+  submitLabel: string;
+}
+const { values, clients, error, submitLabel } = Astro.props;
+const extraType = values.type && !SESSION_TYPES.includes(values.type);
+---
+<form method="POST" class="form wide" novalidate>
+  {error && <p class="alert err" role="alert">{error}</p>}
+
+  <label>
+    <span>Cliente *</span>
+    <select name="client_id" required>
+      <option value="">Selecciona…</option>
+      {clients.map((c) => (
+        <option value={c.id} selected={c.id === values.client_id}>{c.name}</option>
+      ))}
+    </select>
+  </label>
+
+  <div class="row">
+    <label>
+      <span>Tipo de sesión *</span>
+      <select name="type" required>
+        <option value="">Selecciona…</option>
+        {SESSION_TYPES.map((t) => (
+          <option value={t} selected={t === values.type}>{t}</option>
+        ))}
+        {extraType && <option value={values.type} selected>{values.type}</option>}
+      </select>
+    </label>
+
+    <label>
+      <span>Estado</span>
+      <select name="status">
+        {STATUSES.map((s) => (
+          <option value={s.value} selected={s.value === values.status}>{s.label}</option>
+        ))}
+      </select>
+    </label>
+  </div>
+
+  <div class="row">
+    <label>
+      <span>Inicio *</span>
+      <input name="starts_at" type="datetime-local" value={values.starts_at} required />
+    </label>
+    <label>
+      <span>Fin (opcional)</span>
+      <input name="ends_at" type="datetime-local" value={values.ends_at} />
+    </label>
+  </div>
+
+  <div class="row">
+    <label>
+      <span>Lugar</span>
+      <input name="location" value={values.location} placeholder="Estudio, parque, finca…" />
+    </label>
+    <label>
+      <span>Precio (COP)</span>
+      <input name="price" inputmode="numeric" value={values.price} placeholder="350000" />
+    </label>
+  </div>
+
+  <label>
+    <span>Notas</span>
+    <textarea name="notes">{values.notes}</textarea>
+  </label>
+
+  <div class="actions">
+    <button class="btn" type="submit">{submitLabel}</button>
+    <a class="btn ghost" href="/admin/sesiones">Cancelar</a>
+  </div>
+</form>

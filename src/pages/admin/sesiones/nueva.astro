@@ -1,0 +1,45 @@
+---
+export const prerender = false;
+import AdminPanel from '../../../layouts/AdminPanel.astro';
+import SessionForm from '../../../components/SessionForm.astro';
+import { parseSessionForm, emptySession } from '../../../lib/sessions';
+
+const supabase = (Astro.locals as App.Locals & {
+  supabase: import('@supabase/supabase-js').SupabaseClient;
+}).supabase;
+const { data: clients } = await supabase.from('clients').select('id, name').order('name');
+
+let error = '';
+let values = emptySession(Astro.url.searchParams.get('cliente') ?? '');
+
+if (Astro.request.method === 'POST') {
+  const parsed = parseSessionForm(await Astro.request.formData());
+  values = parsed.values;
+
+  if (parsed.error || !parsed.payload) {
+    error = parsed.error ?? 'Datos no válidos';
+  } else {
+    const { error: e } = await supabase.from('sessions').insert(parsed.payload);
+    if (e) error = 'No se pudo guardar. Intenta de nuevo.';
+    else return Astro.redirect('/admin/sesiones?vista=todas&ok=creada');
+  }
+}
+
+const noClients = !clients || clients.length === 0;
+---
+<AdminPanel title="Nueva sesión" active="sesiones">
+  <div class="page-head">
+    <div>
+      <p class="eyebrow">Sesiones</p>
+      <h1>Nueva sesión</h1>
+    </div>
+  </div>
+
+  {noClients ? (
+    <p class="alert err">
+      Primero necesitas un cliente. <a href="/admin/clientes/nuevo">Crear cliente</a>
+    </p>
+  ) : (
+    <SessionForm values={values} clients={clients!} error={error} submitLabel="Crear sesión" />
+  )}
+</AdminPanel>
