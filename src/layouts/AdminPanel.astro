@@ -2,13 +2,14 @@
 import '../styles/admin.css';
 import AdminLayout from './AdminLayout.astro';
 
-interface Props { title: string; active?: 'inicio' | 'clientes' | 'sesiones' }
+interface Props { title: string; active?: 'inicio' | 'calendario' | 'clientes' | 'sesiones' }
 const { title, active } = Astro.props;
 
 const links = [
   { href: '/admin', label: 'Inicio', key: 'inicio' },
-  { href: '/admin/clientes', label: 'Clientes', key: 'clientes' },
+  { href: '/admin/calendario', label: 'Calendario', key: 'calendario' },
   { href: '/admin/sesiones', label: 'Sesiones', key: 'sesiones' },
+  { href: '/admin/clientes', label: 'Clientes', key: 'clientes' },
 ];
 ---
 <AdminLayout title={title}>
@@ -19,7 +20,6 @@ const links = [
         {links.map((l) => (
           <a href={l.href} class:list={[{ active: active === l.key }]}>{l.label}</a>
         ))}
-        <span class="soon">Sesiones <small>pronto</small></span>
       </nav>
       <form method="POST" action="/admin/logout">
         <button class="linkbtn" type="submit">Cerrar sesión</button>

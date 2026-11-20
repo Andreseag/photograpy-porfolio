@@ -1,0 +1,165 @@
+---
+export const prerender = false;
+import AdminPanel from '../../layouts/AdminPanel.astro';
+import { statusLabel, STATUSES } from '../../lib/sessions';
+
+const supabase = (Astro.locals as any).supabase;
+
+/* ── Fechas en hora de Bogotá (UTC-5, sin horario de verano) ── */
+const BOG = 5 * 3600_000;
+const TZ = 'America/Bogota';
+const localKey = (ts: string | number) =>
+  new Date(new Date(ts).getTime() - BOG).toISOString().slice(0, 10); // 'YYYY-MM-DD'
+
+const todayKey = localKey(Date.now());
+
+const raw = Astro.url.searchParams.get('mes') ?? '';
+const mes = /^\d{4}-(0[1-9]|1[0-2])$/.test(raw) ? raw : todayKey.slice(0, 7);
+const [year, month] = mes.split('-').map(Number); // month: 1-12
+
+/* ── Rejilla: de lunes a domingo, semanas completas ── */
+const first = new Date(Date.UTC(year, month - 1, 1));
+const lastOfMonth = new Date(Date.UTC(year, month, 0));
+
+const startOffset = (first.getUTCDay() + 6) % 7; // lunes = 0
+const endOffset = 6 - ((lastOfMonth.getUTCDay() + 6) % 7);
+
+const gridStart = new Date(first);
+gridStart.setUTCDate(1 - startOffset);
+const gridEnd = new Date(lastOfMonth);
+gridEnd.setUTCDate(lastOfMonth.getUTCDate() + endOffset);
+
+const days: { key: string; day: number; inMonth: boolean }[] = [];
+for (let d = new Date(gridStart); d <= gridEnd; d.setUTCDate(d.getUTCDate() + 1)) {
+  const key = d.toISOString().slice(0, 10);
+  days.push({ key, day: d.getUTCDate(), inMonth: key.slice(0, 7) === mes });
+}
+
+/* ── Consulta del rango visible ── */
+const rangeStart = new Date(gridStart.getTime() + BOG).toISOString();
+const rangeEnd = new Date(gridEnd.getTime() + 86_400_000 + BOG).toISOString();
+
+const { data, error } = await supabase
+  .from('sessions')
+  .select('id, type, starts_at, status, clients(name)')
+  .gte('starts_at', rangeStart)
+  .lt('starts_at', rangeEnd)
+  .order('starts_at', { ascending: true });
+
+const rows = data ?? [];
+const clientName = (c: any) => (Array.isArray(c) ? c[0]?.name : c?.name) ?? '—';
+
+const byDay = new Map<string, any[]>();
+rows.forEach((s: { starts_at: string | number; }) => {
+  const k = localKey(s.starts_at);
+  byDay.set(k, [...(byDay.get(k) ?? []), s]);
+});
+
+const monthRows = rows.filter((s: { starts_at: string | number; }) => localKey(s.starts_at).startsWith(mes));
+const monthActive = monthRows.filter((s: { status: string; }) => s.status !== 'cancelada').length;
+
+/* ── Navegación y formato ── */
+const ym = (d: Date) => d.toISOString().slice(0, 7);
+const prev = ym(new Date(Date.UTC(year, month - 2, 1)));
+const next = ym(new Date(Date.UTC(year, month, 1)));
+const isCurrentMonth = mes === todayKey.slice(0, 7);
+
+const rawTitle = new Intl.DateTimeFormat('es-CO', {
+  month: 'long', year: 'numeric', timeZone: 'UTC',
+}).format(first);
+const title = rawTitle.charAt(0).toUpperCase() + rawTitle.slice(1);
+
+const timeFmt = new Intl.DateTimeFormat('es-CO', {
+  hour: '2-digit', minute: '2-digit', hour12: false, timeZone: TZ,
+});
+const dayFmt = new Intl.DateTimeFormat('es-CO', {
+  weekday: 'short', day: 'numeric', month: 'short', timeZone: TZ,
+});
+
+const DOW = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+const MAX_CHIPS = 3;
+---
+<AdminPanel title="Calendario" active="calendario">
+  <div class="page-head">
+    <div>
+      <p class="eyebrow">Agenda</p>
+      <h1>Calendario</h1>
+    </div>
+    <a class="btn" href="/admin/sesiones/nueva">Nueva sesión</a>
+  </div>
+
+  {error && <p class="alert err">No se pudieron cargar las sesiones.</p>}
+
+  <div class="cal-head">
+    <h2 class="cal-title">{title}</h2>
+    <span class="cal-count">{monthActive} {monthActive === 1 ? 'sesión' : 'sesiones'}</span>
+    <nav class="cal-nav" aria-label="Cambiar de mes">
+      <a class="btn ghost small" href={`/admin/calendario?mes=${prev}`} aria-label="Mes anterior">←</a>
+      {!isCurrentMonth && <a class="btn ghost small" href="/admin/calendario">Hoy</a>}
+      <a class="btn ghost small" href={`/admin/calendario?mes=${next}`} aria-label="Mes siguiente">→</a>
+    </nav>
+  </div>
+
+  <div class="cal-legend" aria-label="Leyenda de estados">
+    {STATUSES.map((s) => (
+      <span><i class={`st-${s.value}`}></i>{s.label}</span>
+    ))}
+  </div>
+
+  <div class="cal">
+    <div class="cal-dow">
+      {DOW.map((d) => <span>{d}</span>)}
+    </div>
+
+    <div class="cal-grid">
+      {days.map((d) => {
+        const list = byDay.get(d.key) ?? [];
+        const extra = list.length - MAX_CHIPS;
+        return (
+          <div class:list={['cal-cell', { out: !d.inMonth, today: d.key === todayKey }]}>
+            <span class="cal-num">{d.day}</span>
+            <a
+              class="cal-add"
+              href={`/admin/sesiones/nueva?fecha=${d.key}`}
+              aria-label={`Nueva sesión el ${d.key}`}
+            >+</a>
+
+            <div class="cal-chips">
+              {list.slice(0, MAX_CHIPS).map((s) => (
+                <a
+                  class={`chip st-${s.status}`}
+                  href={`/admin/sesiones/${s.id}`}
+                  title={`${timeFmt.format(new Date(s.starts_at))} · ${clientName(s.clients)} · ${s.type} · ${statusLabel(s.status)}`}
+                >
+                  <b>{timeFmt.format(new Date(s.starts_at))}</b>{clientName(s.clients)}
+                </a>
+              ))}
+              {extra > 0 && <a class="chip-more" href="#agenda">+{extra} más</a>}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  </div>
+
+  <section class="block agenda" id="agenda">
+    <h2>Agenda de {title}</h2>
+    {monthRows.length > 0 ? (
+      <ul class="list">
+        {monthRows.map((s: { id: any; clients: any; starts_at: string | number | Date; type: unknown; status: string; }) => (
+          <li>
+            <div>
+              <a href={`/admin/sesiones/${s.id}`}>{clientName(s.clients)}</a>
+              <small>
+                {dayFmt.format(new Date(s.starts_at))} · {timeFmt.format(new Date(s.starts_at))} · {s.type}
+              </small>
+            </div>
+            <span class={`badge ${s.status}`}>{statusLabel(s.status)}</span>
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <p class="empty">No hay sesiones este mes.</p>
+    )}
+  </section>
+</AdminPanel>

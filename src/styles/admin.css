@@ -388,3 +388,394 @@ td a:hover {
   background: #8a3b3b;
   border-color: #8a3b3b;
 }
+
+/* ── Dashboard ── */
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.kpi {
+  padding: 1.25rem 1.25rem 1.1rem;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid var(--line);
+}
+.kpi .label {
+  margin: 0 0 0.7rem;
+  font-size: 0.64rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.kpi .value {
+  margin: 0;
+  font-family: "Cormorant Garamond", serif;
+  font-size: 2.1rem;
+  font-weight: 300;
+  line-height: 1;
+}
+.kpi .sub {
+  margin: 0.55rem 0 0;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+.kpi .sub a {
+  color: var(--accent-deep);
+  text-decoration: none;
+}
+.kpi .sub a:hover {
+  text-decoration: underline;
+}
+
+.dash-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+.dash-grid.even {
+  grid-template-columns: 1fr 1fr;
+}
+@media (max-width: 900px) {
+  .dash-grid,
+  .dash-grid.even {
+    grid-template-columns: 1fr;
+  }
+}
+
+.block {
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid var(--line);
+}
+.block h2 {
+  margin: 0 0 1.25rem;
+  font-family: "Cormorant Garamond", serif;
+  font-weight: 400;
+  font-size: 1.35rem;
+}
+.hint {
+  margin: 1.25rem 0 0;
+  font-size: 0.74rem;
+  color: var(--muted);
+}
+
+/* Barras verticales (6 meses) */
+.vbars {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0.75rem;
+  align-items: end;
+}
+.vbar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+}
+.vbar-val {
+  font-size: 0.85rem;
+}
+.vbar-track {
+  width: 100%;
+  max-width: 46px;
+  height: 140px;
+  display: flex;
+  align-items: flex-end;
+  background: rgba(154, 171, 142, 0.12);
+}
+.vbar-fill {
+  width: 100%;
+  background: var(--accent);
+  transition: height 0.4s ease;
+}
+.vbar.current .vbar-fill {
+  background: var(--accent-deep);
+}
+.vbar-label {
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.vbar-sub {
+  font-size: 0.7rem;
+  color: var(--muted);
+}
+
+/* Barras horizontales (por tipo) */
+.hbars {
+  display: grid;
+  gap: 0.95rem;
+}
+.hbar-top {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.3rem;
+  font-size: 0.86rem;
+}
+.hbar-track {
+  height: 6px;
+  background: rgba(154, 171, 142, 0.18);
+}
+.hbar-fill {
+  height: 100%;
+  background: var(--accent-deep);
+}
+
+/* Listas */
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.8rem 0;
+  border-bottom: 1px solid var(--line);
+}
+.list li:last-child {
+  border-bottom: 0;
+}
+.list a {
+  color: var(--ink);
+  text-decoration: none;
+  font-weight: 400;
+}
+.list a:hover {
+  color: var(--accent-deep);
+}
+.list small {
+  display: block;
+  margin-top: 0.15rem;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+.link-more {
+  display: inline-block;
+  margin-top: 1rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent-deep);
+  text-decoration: none;
+}
+.link-more:hover {
+  text-decoration: underline;
+}
+
+/* ── Calendario ── */
+.cal-head {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+.cal-title {
+  margin: 0;
+  font-family: "Cormorant Garamond", serif;
+  font-weight: 300;
+  font-size: 1.8rem;
+}
+.cal-count {
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+.cal-nav {
+  display: flex;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+.btn.small {
+  padding: 0.55rem 1rem;
+}
+
+/* Colores por estado (compartidos por etiquetas y leyenda) */
+.st-cotizada {
+  --c: #9a7b3a;
+}
+.st-confirmada {
+  --c: var(--accent-deep);
+}
+.st-realizada {
+  --c: #4f6f86;
+}
+.st-entregada {
+  --c: var(--ink);
+}
+.st-cancelada {
+  --c: #8a3b3b;
+}
+
+.cal-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.1rem;
+  margin-bottom: 1rem;
+  font-size: 0.74rem;
+  color: var(--muted);
+}
+.cal-legend i {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 0.4rem;
+  background: var(--c);
+  vertical-align: -1px;
+}
+
+.cal {
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.6);
+}
+.cal-dow,
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+.cal-dow {
+  border-bottom: 1px solid var(--line);
+}
+.cal-dow span {
+  padding: 0.7rem 0.5rem;
+  text-align: center;
+  font-size: 0.64rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.cal-cell {
+  position: relative;
+  min-height: 116px;
+  padding: 0.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.cal-cell:nth-child(7n) {
+  border-right: 0;
+}
+.cal-cell.out {
+  background: rgba(43, 46, 41, 0.025);
+}
+.cal-cell.out .cal-num {
+  opacity: 0.4;
+}
+
+.cal-num {
+  width: 1.7rem;
+  height: 1.7rem;
+  display: grid;
+  place-items: center;
+  font-size: 0.8rem;
+  border-radius: 50%;
+}
+.cal-cell.today .cal-num {
+  color: #fff;
+  background: var(--accent-deep);
+}
+
+.cal-add {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.4rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: grid;
+  place-items: center;
+  font-size: 1rem;
+  line-height: 1;
+  color: var(--accent-deep);
+  text-decoration: none;
+  border: 1px solid var(--line);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.cal-cell:hover .cal-add,
+.cal-add:focus-visible {
+  opacity: 1;
+}
+
+.cal-chips {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+.chip {
+  display: block;
+  padding: 0.2rem 0.4rem;
+  font-size: 0.72rem;
+  line-height: 1.25;
+  color: var(--ink);
+  text-decoration: none;
+  background: rgba(255, 255, 255, 0.9);
+  border-left: 3px solid var(--c, var(--accent-deep));
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.chip:hover {
+  background: #fff;
+}
+.chip b {
+  margin-right: 0.3rem;
+  font-weight: 500;
+}
+.chip.st-cancelada {
+  opacity: 0.55;
+  text-decoration: line-through;
+}
+.chip-more {
+  padding-left: 0.4rem;
+  font-size: 0.7rem;
+  color: var(--muted);
+  text-decoration: none;
+}
+.chip-more:hover {
+  color: var(--accent-deep);
+}
+
+.agenda {
+  margin-top: 1.5rem;
+}
+
+@media (max-width: 800px) {
+  .cal-cell {
+    min-height: 64px;
+    padding: 0.3rem;
+  }
+  .cal-add {
+    display: none;
+  }
+  .cal-chips {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 3px;
+  }
+  .chip {
+    width: 8px;
+    height: 8px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    font-size: 0;
+    background: var(--c);
+  }
+  .chip-more {
+    display: none;
+  }
+  .cal-dow span {
+    padding: 0.6rem 0.1rem;
+    letter-spacing: 0.05em;
+  }
+}

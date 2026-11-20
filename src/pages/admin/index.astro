@@ -1,14 +1,196 @@
 ---
 export const prerender = false;
 import AdminPanel from '../../layouts/AdminPanel.astro';
+import { STATUSES, formatDate, formatCOP, statusLabel } from '../../lib/sessions';
+
+const supabase = (Astro.locals as any).supabase;
+
+const [sessionsRes, clientsRes] = await Promise.all([
+  supabase
+    .from('sessions')
+    .select('id, type, starts_at, price, status, clients(name)')
+    .order('starts_at', { ascending: true }),
+  supabase.from('clients').select('id', { count: 'exact', head: true }),
+]);
+
+const failed = Boolean(sessionsRes.error || clientsRes.error);
+const all = sessionsRes.data ?? [];
+const totalClients = clientsRes.count ?? 0;
+
+/* ── Fechas en hora de Bogotá (UTC-5, sin horario de verano) ── */
+const BOG = 5 * 3600_000;
+const monthKey = (ts: string | number) =>
+  new Date(new Date(ts).getTime() - BOG).toISOString().slice(0, 7); // 'YYYY-MM'
+
+const nowMs = Date.now();
+const thisMonth = monthKey(nowMs);
+
+const monthFmt = new Intl.DateTimeFormat('es-CO', { month: 'short', timeZone: 'UTC' });
+const months = Array.from({ length: 6 }, (_, i) => {
+  const d = new Date(nowMs - BOG);
+  d.setUTCDate(1);
+  d.setUTCMonth(d.getUTCMonth() - (5 - i));
+  const key = d.toISOString().slice(0, 7);
+  return { key, label: monthFmt.format(new Date(`${key}-01T12:00:00Z`)).replace('.', '') };
+});
+
+/* ── Datos base ── */
+const active = all.filter((s: { status: string; }) => s.status !== 'cancelada');
+const isDone = (s: { status: string }) => s.status === 'realizada' || s.status === 'entregada';
+const sum = (rows: { price: number | string | null }[]) =>
+  rows.reduce((t, s) => t + Number(s.price ?? 0), 0);
+
+const clientName = (c: any) => (Array.isArray(c) ? c[0]?.name : c?.name) ?? '—';
+
+/* ── Indicadores ── */
+const monthRows = active.filter((s: { starts_at: string | number; }) => monthKey(s.starts_at) === thisMonth);
+const incomeMonth = sum(monthRows.filter(isDone));
+const projected = sum(monthRows.filter((s: { status: string; }) => s.status === 'confirmada'));
+
+const upcoming = active.filter(
+  (s: { starts_at: string | number | Date; status: string; }) =>
+    new Date(s.starts_at).getTime() >= nowMs &&
+    (s.status === 'cotizada' || s.status === 'confirmada')
+);
+const toConfirm = upcoming.filter((s: { status: string; }) => s.status === 'cotizada').length;
+const toDeliver = all.filter((s: { status: string; }) => s.status === 'realizada').length;
+
+/* ── Gráfico de 6 meses ── */
+const monthStats = months.map((m) => {
+  const rows = active.filter((s: { starts_at: string | number; }) => monthKey(s.starts_at) === m.key);
+  return { ...m, count: rows.length, income: sum(rows.filter(isDone)) };
+});
+const maxCount = Math.max(1, ...monthStats.map((m) => m.count));
+
+const compact = new Intl.NumberFormat('es-CO', { notation: 'compact', maximumFractionDigits: 1 });
+const short = (n: number) => (n ? `$${compact.format(n)}` : '—');
+
+/* ── Por tipo y por estado ── */
+const typeMap = new Map<string, number>();
+active.forEach((s: { type: string; }) => typeMap.set(s.type, (typeMap.get(s.type) ?? 0) + 1));
+const byType = [...typeMap.entries()].sort((a, b) => b[1] - a[1]).slice(0, 6);
+const maxType = Math.max(1, ...byType.map(([, n]) => n));
+
+const byStatus = STATUSES.map((s) => ({
+  ...s,
+  count: all.filter((x: { status: string; }) => x.status === s.value).length,
+}));
+
+const nextSessions = upcoming.slice(0, 5);
 ---
 <AdminPanel title="Inicio" active="inicio">
   <div class="page-head">
     <div>
-      <p class="eyebrow">Bienvenida</p>
+      <p class="eyebrow">Resumen</p>
       <h1>Panel de gestión</h1>
     </div>
-    <a class="btn" href="/admin/clientes/nuevo">Nuevo cliente</a>
+    <a class="btn" href="/admin/sesiones/nueva">Nueva sesión</a>
   </div>
-  <p>Sesión iniciada como {(Astro.locals as typeof Astro.locals & { user: { email: string } }).user.email}.</p>
+
+  {failed && <p class="alert err">No se pudieron cargar algunos datos.</p>}
+
+  <section class="kpis" aria-label="Indicadores">
+    <article class="kpi">
+      <p class="label">Sesiones este mes</p>
+      <p class="value">{monthRows.length}</p>
+    </article>
+
+    <article class="kpi">
+      <p class="label">Ingresos del mes</p>
+      <p class="value">{formatCOP(incomeMonth)}</p>
+      <p class="sub">+ {formatCOP(projected)} confirmados</p>
+    </article>
+
+    <article class="kpi">
+      <p class="label">Próximas sesiones</p>
+      <p class="value">{upcoming.length}</p>
+      <p class="sub">{toConfirm} por confirmar</p>
+    </article>
+
+    <article class="kpi">
+      <p class="label">Por entregar</p>
+      <p class="value">{toDeliver}</p>
+      <p class="sub">realizadas sin entregar</p>
+    </article>
+
+    <article class="kpi">
+      <p class="label">Clientes</p>
+      <p class="value">{totalClients}</p>
+      <p class="sub"><a href="/admin/clientes">Ver todos</a></p>
+    </article>
+  </section>
+
+  <div class="dash-grid">
+    <section class="block">
+      <h2>Últimos 6 meses</h2>
+      <div class="vbars">
+        {monthStats.map((m) => (
+          <div class:list={['vbar', { current: m.key === thisMonth }]}>
+            <span class="vbar-val">{m.count}</span>
+            <div class="vbar-track">
+              <div
+                class="vbar-fill"
+                style={`height:${m.count ? Math.max(4, (m.count / maxCount) * 100) : 0}%`}
+              ></div>
+            </div>
+            <span class="vbar-label">{m.label}</span>
+            <span class="vbar-sub">{short(m.income)}</span>
+          </div>
+        ))}
+      </div>
+      <p class="hint">Barras: sesiones. Debajo de cada mes: ingresos de sesiones realizadas o entregadas.</p>
+    </section>
+
+    <section class="block">
+      <h2>Próximas sesiones</h2>
+      {nextSessions.length > 0 ? (
+        <ul class="list">
+          {nextSessions.map((s: { id: any; clients: any; starts_at: string; type: unknown; status: string; }) => (
+            <li>
+              <div>
+                <a href={`/admin/sesiones/${s.id}`}>{clientName(s.clients)}</a>
+                <small>{formatDate(s.starts_at)} · {s.type}</small>
+              </div>
+              <span class={`badge ${s.status}`}>{statusLabel(s.status)}</span>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p class="empty">No hay sesiones próximas.</p>
+      )}
+      <a class="link-more" href="/admin/sesiones">Ver agenda completa →</a>
+    </section>
+  </div>
+
+  <div class="dash-grid even">
+    <section class="block">
+      <h2>Por tipo de sesión</h2>
+      {byType.length > 0 ? (
+        <div class="hbars">
+          {byType.map(([type, n]) => (
+            <div>
+              <div class="hbar-top"><span>{type}</span><span>{n}</span></div>
+              <div class="hbar-track">
+                <div class="hbar-fill" style={`width:${(n / maxType) * 100}%`}></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p class="empty">Aún no hay datos.</p>
+      )}
+    </section>
+
+    <section class="block">
+      <h2>Por estado</h2>
+      <ul class="list">
+        {byStatus.map((s) => (
+          <li>
+            <span class={`badge ${s.value}`}>{s.label}</span>
+            <strong>{s.count}</strong>
+          </li>
+        ))}
+      </ul>
+    </section>
+  </div>
 </AdminPanel>

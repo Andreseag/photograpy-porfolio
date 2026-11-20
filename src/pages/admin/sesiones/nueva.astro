@@ -1,16 +1,19 @@
 ---
 export const prerender = false;
+import type { SupabaseClient } from '@supabase/supabase-js';
 import AdminPanel from '../../../layouts/AdminPanel.astro';
-import SessionForm from '../../../components/SessionForm.astro';
+import SessionForm from '../../../components/SessionForm.astro';  
 import { parseSessionForm, emptySession } from '../../../lib/sessions';
 
-const supabase = (Astro.locals as App.Locals & {
-  supabase: import('@supabase/supabase-js').SupabaseClient;
-}).supabase;
+const supabase = (Astro.locals as unknown as { supabase: SupabaseClient }).supabase;
 const { data: clients } = await supabase.from('clients').select('id, name').order('name');
 
 let error = '';
 let values = emptySession(Astro.url.searchParams.get('cliente') ?? '');
+
+// Fecha precargada desde el calendario (?fecha=YYYY-MM-DD)
+const fecha = Astro.url.searchParams.get('fecha') ?? '';
+if (/^\d{4}-\d{2}-\d{2}$/.test(fecha)) values.starts_at = `${fecha}T09:00`;
 
 if (Astro.request.method === 'POST') {
   const parsed = parseSessionForm(await Astro.request.formData());
